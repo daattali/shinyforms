@@ -1,6 +1,6 @@
 questions <- list(
   list(id = "name", type = "text", title = "Name", mandatory = TRUE),
-  list(id = "age", type = "numeric", title = "Name", mandatory = FALSE),
+  list(id = "age", type = "numeric", title = "Age", mandatory = FALSE),
   list(id = "favourite_pkg", type = "text", title = "Favourite R package", mandatory = FALSE),
   list(id = "terms", type = "checkbox", title = "I agree to the terms")
 )

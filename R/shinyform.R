@@ -33,6 +33,13 @@ saveData <- function(data, storage) {
   }
 }
 
+loadData <- function(storage) {
+  if (storage$type == STORAGE_TYPES$FLATFILE) {
+    loadDataFlatfile(storage)
+  } else if (storage$type == STORAGE_TYPES$GOOGLE_SHEETS) {
+    #loadDataGsheets(storage)
+  }
+}
 saveDataFlatfile <- function(data, storage) {
   fileName <- paste0(
     paste(
@@ -49,7 +56,8 @@ saveDataFlatfile <- function(data, storage) {
   write.csv(x = data, file = file.path(resultsDir, fileName),
             row.names = FALSE, quote = TRUE)
 }
-loadDataFlatfile <- function() {
+loadDataFlatfile <- function(storage) {
+  resultsDir <- storage$path
   files <- list.files(file.path(resultsDir), full.names = TRUE)
   data <- lapply(files, read.csv, stringsAsFactors = FALSE)
   data <- do.call(rbind, data)
@@ -110,7 +118,15 @@ formUI <- function(formInfo) {
         h3("Thanks, your response was submitted successfully!"),
         actionLink(ns("submit_another"), "Submit another response")
       )
-    )
+    ),
+    br(),br(),
+    actionLink(ns("showhide"), "Show/Hide responses (Admin only)"),
+    br(),
+    shinyjs::hidden(div(
+      id = ns("answers"),
+      downloadButton(ns("downloadBtn"), "Download responses"), br(), br(),
+      DT::dataTableOutput(ns("responsesTable"))
+    ))
   )
 }
 
@@ -186,5 +202,15 @@ formServerHelper <- function(input, output, session, formInfo) {
     data
   }) 
   
+  output$responsesTable <- DT::renderDataTable(
+    DT::datatable(
+      loadData(formInfo$storage),
+      rownames = FALSE,
+      options = list(searching = FALSE, lengthChange = FALSE, scrollX = TRUE)
+    )
+  )
   
+  observeEvent(input$showhide, {
+    shinyjs::toggle("answers")
+  })
 }
