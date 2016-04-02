@@ -2,13 +2,22 @@
 
 **Note: This is very much a work in progress in its baby stages. This package has 3 hours of work in it currently.**
 
+- [What does shinyforms do?](#what-does-shinyforms-do)
+- [But, why?](#buy-why)
+- [How do I use this?](#how-do-i-use-this)
+- [Current features](#current-features)
+- [Future features](#future-features)
+- [Another example](#another-example)
+- [Feedback](#feedback)
+- [Notes](#notes)
+
 #### What does `shinyforms` do?
 
-The idea of `shinyforms` is to let you create questions/polls/surveys as Shiny apps very easily.  Kind of like mimicking a Google Form.  
+The idea of `shinyforms` is to let you create questions/polls/surveys as Shiny apps *very* easily.  Kind of like mimicking a Google Form.  
 
 #### But, why?
 
-Good question.  You should read my [blog post](http://deanattali.com/2015/06/14/mimicking-google-form-shiny/) where I discuss how to mimick Google Forms with Shiny, and why I originally needed to do it. I've created a few Shiny apps that request user input and save it somewhere, and I wanted to make it super streamlined for anyone else to do so in the future. There are a lot of small features that go into building a form app (many things might not be obvious until you actually have to do it), and it isn't trivial, so it's nice if all that could be abstracted away and all you'd have to do to create a form is supply the questions.
+Good question.  You should read my [blog post](http://deanattali.com/2015/06/14/mimicking-google-form-shiny/) where I discuss how to mimick Google Forms with Shiny, and why I originally needed to do it. I've created a few Shiny apps that request user input and save it somewhere, and I wanted to make it super streamlined for anyone else to do so in the future.
 
 #### How do I use this?
 
@@ -76,7 +85,7 @@ Of course you could put more stuff in the app, but this is the beauty of it, the
 - Ability to submit multiple responses for the same form (use `multiple = FALSE` in the form info list to disallow multiple submissions)
 - Admin mode support: if you add `?admin=1` to the URL, you will see buttons for viewing all submitted responses below each form.  If you want to see all responses, you'll have to enter a password to verify you're an admin (since anybody can just modify the URL). The password is provided by the `password` in the form info list. 
 
-#### Soon to be implemented/ideas I'm not 100% sure about
+#### Future features
 
 - Responses can be saved to MySQL, SQLite, MongoDB, Dropbox, Google Sheets, Amazon S3 (I already have a working app with all these storage types, you can see it [here](http://daattali.com/shiny/persistent-data-storage/))
 - Supported question types: all the input types in Shiny
@@ -85,10 +94,6 @@ Of course you could put more stuff in the app, but this is the beauty of it, the
 - Questions and form data are in the format of JSON/YAML
 - Can generate a full Shiny app instead of only the UI and server pieces? This would be useful for complete beginners who don't want to create anything in Shiny themselves, and just want the entire app to be the form
 - Add support for more complex input validation before allowing the submit button to be clicked
-
-#### Feedback
-
-If you think you could have a use for `shinyforms`, please do [let me know](http://deanattali.com/aboutme/#contact) or [file an issue](https://github.com/daattali/shinyforms/issues). Don't be shy!
 
 #### Another example
 
@@ -153,6 +158,10 @@ shinyApp(ui = ui, server = server)
 
 Notice how easy this is? After defining the forms with R lists, it's literally two function calls for each form to get it set up. A couple things to note: first, the soccer form uses the `multiple = FALSE` option, which means the user can only submit once (if you restart the Shiny app, he'd be able to submit again).  Secondly, the first form uses the `password` option, which means that the admin table will be available IF you add `?admin=1` to the URL. To see the responses from the admin table, click on "Show responses" and type in the password "shinyforms".
 
-#### Last notes
+#### Feedback
+
+If you think you could have a use for `shinyforms`, please do [let me know](http://deanattali.com/aboutme/#contact) or [file an issue](https://github.com/daattali/shinyforms/issues). Don't be shy!
+
+#### Notes
 
 Please don't look at the code, it's hideous! This was done at runconf16 in just a few very short hours so it needs to be cleaned up quite a bit. Also, since so little time was spent building this package so far, it's very likely that the API will change. I'm completely open for input.
