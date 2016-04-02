@@ -120,7 +120,9 @@ formUI <- function(formInfo) {
       )
     ),
     br(),br(),
-    actionLink(ns("showhide"), "Show/Hide responses (Admin only)"),
+    shinyjs::hidden(
+      actionLink(ns("showhide"), "Show/Hide responses (Admin only)"),br()
+    ),
     br(),
     shinyjs::hidden(div(
       id = ns("answers"),
@@ -209,6 +211,15 @@ formServerHelper <- function(input, output, session, formInfo) {
       options = list(searching = FALSE, lengthChange = FALSE, scrollX = TRUE)
     )
   )
+  
+  values <- reactiveValues(admin = FALSE)
+  observe({
+    search <- parseQueryString(session$clientData$url_search)
+    if ("admin" %in% names(search)) {
+      values$admin <- TRUE
+      shinyjs::show("showhide")
+    }
+  })
   
   observeEvent(input$showhide, {
     shinyjs::toggle("answers")
