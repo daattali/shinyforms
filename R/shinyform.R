@@ -21,8 +21,13 @@ labelMandatory <- function(label) {
 appCSS <- "
 .mandatory_star { color: red; }
 .shiny-input-container { margin-top: 25px; }
-.sf_submit_msg { margin-left: 15px; }
-.sf_error { color: red; }
+.thankyou_msg { margin-top: 10px; }
+.showhide { margin-top: 10px; display: inline-block; }
+.sf_submit_msg { margin-left: 10px; font-weight: bold; }
+.sf_error { margin-top: 15px; color: red; }
+.answers { margin-top: 10px; }
+.pw-box { margin-top: -20px; }
+.created-by { font-size: 12px; font-style: italic; color: #777; margin: 20px auto 10px;}
 "
 
 saveData <- function(data, storage) {
@@ -106,29 +111,46 @@ formUI <- function(formInfo) {
       ),
       actionButton(ns("submit"), "Submit", class = "btn-primary"),
       shinyjs::hidden(
-        span(id = ns("submit_msg"), class = "sf_submit_msg", "Submitting..."),
+        span(id = ns("submit_msg"),
+             class = "sf_submit_msg",
+             "Submitting..."),
         div(class = "sf_error", id = ns("error"),
-            div(br(), tags$b("Error: "), span(id = ns("error_msg")))
+            div(tags$b(icon("exclamation-circle"), "Error: "),
+                span(id = ns("error_msg")))
         )
       )
     ),
     shinyjs::hidden(
       div(
         id = ns("thankyou_msg"),
+        class = "thankyou_msg",
         h3("Thanks, your response was submitted successfully!"),
         actionLink(ns("submit_another"), "Submit another response")
       )
     ),
-    br(),br(),
     shinyjs::hidden(
-      actionLink(ns("showhide"), "Show/Hide responses (Admin only)"),br()
+      actionLink(ns("showhide"),
+                 class = "showhide",
+                 "Show responses (Admin only)")
     ),
-    br(),
+    
     shinyjs::hidden(div(
       id = ns("answers"),
-      downloadButton(ns("downloadBtn"), "Download responses"), br(), br(),
-      DT::dataTableOutput(ns("responsesTable"))
-    ))
+      class = "answers",
+      div(class = "pw-box", id = ns("pw-box"),
+        passwordInput(ns("adminpw"), "Password"),
+        actionButton(ns("submitPw"), "Log in")
+      ),
+      shinyjs::hidden(div(id = ns("showAnswers"),
+          downloadButton(ns("downloadBtn"), "Download responses"),
+          DT::dataTableOutput(ns("responsesTable"))
+      ))
+    )),
+    
+    div(class = "created-by",
+        "Created with",
+        a(href = "https://github.com/daattali/shinyforms", "shinyforms")
+    )
   )
 }
 
@@ -138,6 +160,16 @@ formServer <- function(formInfo) {
 }
 
 formServerHelper <- function(input, output, session, formInfo) {
+  if (grepl("\\s", formInfo$id)) {
+    stop("Form id cannot have any spaces", call. = FALSE)
+  }
+  
+  if (formInfo$storage$type == STORAGE_TYPES$FLATFILE) {
+    if (!dir.exists(formInfo$storage$path)) {
+      dir.create(formInfo$storage$path, showWarnings = FALSE)
+    }
+  }
+  
   questions <- formInfo$questions
   
   fieldsMandatory <- Filter(function(x) { x$mandatory }, questions)
@@ -204,18 +236,22 @@ formServerHelper <- function(input, output, session, formInfo) {
     data
   }) 
   
-  output$responsesTable <- DT::renderDataTable(
+  output$responsesTable <- DT::renderDataTable({
+    if (!values$adminVerified) {
+      return(matrix(0))
+    }
+    
     DT::datatable(
       loadData(formInfo$storage),
       rownames = FALSE,
       options = list(searching = FALSE, lengthChange = FALSE, scrollX = TRUE)
     )
-  )
+  })
   
-  values <- reactiveValues(admin = FALSE)
+  values <- reactiveValues(admin = FALSE, adminVerified = FALSE)
   observe({
     search <- parseQueryString(session$clientData$url_search)
-    if ("admin" %in% names(search)) {
+    if ("admin" %in% names(search) && !is.null(formInfo$password)) {
       values$admin <- TRUE
       shinyjs::show("showhide")
     }
@@ -224,4 +260,22 @@ formServerHelper <- function(input, output, session, formInfo) {
   observeEvent(input$showhide, {
     shinyjs::toggle("answers")
   })
+
+  observeEvent(input$submitPw, {
+    if (input$adminpw == formInfo$password) {
+      values$adminVerified <- TRUE
+      shinyjs::show("showAnswers")
+      shinyjs::hide("pw-box")
+    }
+  })
+
+  # Allow admins to download responses
+  output$downloadBtn <- downloadHandler(
+    filename = function() {
+      sprintf("%s_%s.csv", formInfo$id, format(Sys.time(), "%Y%m%d-%H%M%OS"))
+    },
+    content = function(file) {
+      write.csv(loadData(formInfo$storage), file, row.names = FALSE)
+    }
+  )
 }

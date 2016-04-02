@@ -10,7 +10,8 @@ formInfo <- list(
   storage = list(
     type = STORAGE_TYPES$FLATFILE,
     path = "responses"
-  )
+  ),
+  password = "shinyforms"
 )
 
 
@@ -22,8 +23,6 @@ formInfo2 <- list(
     list(id = "player", type = "text", title = "Favourite player")
   ),
   storage = list(
-    #type = STORAGE_TYPES$GOOGLE_SHEETS,
-    #key = "1PQuXmzr-6Y9r-m5P7jtJcg2Z3WJ7SyzrLLYbBOmsPys"
     type = STORAGE_TYPES$FLATFILE,
     path = "soccer"
   )
