@@ -27,7 +27,7 @@ appCSS <- "
 .sf_error { margin-top: 15px; color: red; }
 .answers { margin-top: 10px; }
 .pw-box { margin-top: -20px; }
-.created-by { font-size: 12px; font-style: italic; color: #777; margin: 20px auto 10px;}
+.created-by { font-size: 12px; font-style: italic; color: #777; margin: 25px auto 10px;}
 "
 
 saveData <- function(data, storage) {
@@ -87,11 +87,17 @@ formUI <- function(formInfo) {
   fieldsMandatory <- Filter(function(x) { !is.null(x$mandatory) && x$mandatory }, questions)
   fieldsMandatory <- unlist(lapply(fieldsMandatory, function(x) { x$id }))
   
+  titleElement <- NULL
+  if (!is.null(formInfo$name)) {
+    titleElement <- h2(formInfo$name)
+  }
+  
   tagList(
-    shinyjs::useShinyjs(debug=T),
+    shinyjs::useShinyjs(),
     shinyjs::inlineCSS(appCSS),
     div(
       id = ns("form"),
+      titleElement,
       lapply(
         questions,
         function(question) {
@@ -172,7 +178,7 @@ formServerHelper <- function(input, output, session, formInfo) {
   
   questions <- formInfo$questions
   
-  fieldsMandatory <- Filter(function(x) { x$mandatory }, questions)
+  fieldsMandatory <- Filter(function(x) {!is.null(x$mandatory) && x$mandatory }, questions)
   fieldsMandatory <- unlist(lapply(fieldsMandatory, function(x) { x$id }))
   fieldsAll <- unlist(lapply(questions, function(x) { x$id }))
   
