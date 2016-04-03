@@ -19,16 +19,15 @@ labelMandatory <- function(label) {
 }
 
 appCSS <- "
-.shinyforms-ui .mandatory_star { color: red; }
-.shinyforms-ui .shiny-input-container { margin-top: 25px; font-size: 16px; }
-.shinyforms-ui .action-button { font-size: 16px; }
-.shinyforms-ui .thankyou_msg { margin-top: 10px; }
-.shinyforms-ui .showhide { margin-top: 10px; display: inline-block; }
-.shinyforms-ui .sf_submit_msg { margin-left: 10px; font-weight: bold; }
-.shinyforms-ui .sf_error { margin-top: 15px; color: red; }
-.shinyforms-ui .answers { margin-top: 10px; }
-.shinyforms-ui .pw-box { margin-top: -20px; }
-.shinyforms-ui .created-by { font-size: 12px; font-style: italic; color: #777; margin: 25px auto 10px;}
+.mandatory_star { color: red; }
+.shiny-input-container { margin-top: 25px; }
+.thankyou_msg { margin-top: 10px; }
+.showhide { margin-top: 10px; display: inline-block; }
+.sf_submit_msg { margin-left: 10px; font-weight: bold; }
+.sf_error { margin-top: 15px; color: red; }
+.answers { margin-top: 10px; }
+.pw-box { margin-top: -20px; }
+.created-by { font-size: 12px; font-style: italic; color: #777; margin: 25px auto 10px;}
 "
 
 saveData <- function(data, storage) {
@@ -80,97 +79,104 @@ loadDataGsheets <- function() {
 
 #' @export
 formUI <- function(formInfo) {
-  
-  ns <- NS(formInfo$id)
-  
-  questions <- formInfo$questions
-  
-  fieldsMandatory <- Filter(function(x) { !is.null(x$mandatory) && x$mandatory }, questions)
-  fieldsMandatory <- unlist(lapply(fieldsMandatory, function(x) { x$id }))
-  
-  titleElement <- NULL
-  if (!is.null(formInfo$name)) {
-    titleElement <- h2(formInfo$name)
-  }
-  
-  responseText <- "Thank you, your response was submitted successfully."
-  if (!is.null(formInfo$responseText)) {
-    responseText <- formInfo$responseText
-  }
-  
-  div(
-    shinyjs::useShinyjs(),
-    shinyjs::inlineCSS(appCSS),
-    class = "shinyforms-ui",
-    div(
-      id = ns("form"),
-      titleElement,
-      lapply(
-        questions,
-        function(question) {
-          label <- question$title
-          if (question$id %in% fieldsMandatory) {
-            label <- labelMandatory(label)
+  formUI <- lapply(formInfo,function(form) {
+    ns <- NS(form$id)
+    
+    questions <- form$questions
+    
+    fieldsMandatory <- Filter(function(x) { !is.null(x$mandatory) && x$mandatory }, questions)
+    fieldsMandatory <- unlist(lapply(fieldsMandatory, function(x) { x$id }))
+    
+    titleElement <- NULL
+    if (!is.null(formInfo$name)) {
+      titleElement <- h2(formInfo$name)
+    }
+    
+    formSheet <-  tagList(
+      shinyjs::useShinyjs(),
+      shinyjs::inlineCSS(appCSS),
+      div(
+        id = ns("form"),
+        titleElement,
+        lapply(
+          questions,
+          function(question) {
+            label <- question$title
+            if (question$id %in% fieldsMandatory) {
+              label <- labelMandatory(label)
+            }
+            
+            if (question$type == "text") {
+              textInput(ns(question$id), label, "")
+            } else if (question$type == "numeric") {
+              numericInput(ns(question$id), label, 0)
+            } else if (question$type == "checkbox") {
+              checkboxInput(ns(question$id), label, FALSE)
+            }
           }
-          
-          if (question$type == "text") {
-            textInput(ns(question$id), label, "")
-          } else if (question$type == "numeric") {
-            numericInput(ns(question$id), label, 0)
-          } else if (question$type == "checkbox") {
-            checkboxInput(ns(question$id), label, FALSE)
-          }
-        }
-      ),
-      actionButton(ns("submit"), "Submit", class = "btn-primary"),
-      if(!is.null(formInfo$reset) && formInfo$reset) {
-        actionButton(ns("reset"), "Reset")
-      },
-      shinyjs::hidden(
-        span(id = ns("submit_msg"),
-             class = "sf_submit_msg",
-             "Submitting..."),
-        div(class = "sf_error", id = ns("error"),
-            div(tags$b(icon("exclamation-circle"), "Error: "),
-                span(id = ns("error_msg")))
         )
       )
-    ),
-    shinyjs::hidden(
-      div(
-        id = ns("thankyou_msg"),
-        class = "thankyou_msg",
-        strong(responseText), br(),
-        actionLink(ns("submit_another"), "Submit another response")
-      )
-    ),
-    shinyjs::hidden(
-      actionLink(ns("showhide"),
-                 class = "showhide",
-                 "Show responses")
-    ),
-    
-    shinyjs::hidden(div(
-      id = ns("answers"),
-      class = "answers",
-      div(
-        class = "pw-box", id = ns("pw-box"),
-        inlineInput(
-          passwordInput(ns("adminpw"), NULL, placeholder = "Password")
-        ),
-        actionButton(ns("submitPw"), "Log in")
-      ),
-      shinyjs::hidden(div(id = ns("showAnswers"),
-          downloadButton(ns("downloadBtn"), "Download responses"),
-          DT::dataTableOutput(ns("responsesTable"))
-      ))
-    )),
-    
-    div(class = "created-by",
-        "Created with",
-        a(href = "https://github.com/daattali/shinyforms", "shinyforms")
     )
-  )
+    return(formSheet)
+  })
+  
+  submitForm <- lapply(formInfo,function(form) {
+    ns <- NS(form$id)
+    # if list of forms - check if max and add submit if true
+    numForms <-  length(formInfo)
+    maxID <- formInfo[[numForms]]$id
+    if ( maxID == form$id) {
+      tagList(
+        shinyjs::useShinyjs(),
+        shinyjs::inlineCSS(appCSS),
+        div(
+          actionButton(ns("submit"), "Submit", class = "btn-primary"),
+          shinyjs::hidden(
+            span(id = ns("submit_msg"),
+                 class = "sf_submit_msg",
+                 "Submitting..."),
+            div(class = "sf_error", id = ns("error"),
+                div(tags$b(icon("exclamation-circle"), "Error: "),
+                    span(id = ns("error_msg")))
+            )
+          )
+        ),
+        shinyjs::hidden(
+          div(
+            id = ns("thankyou_msg"),
+            class = "thankyou_msg",
+            h3("Thanks, your response was submitted successfully!"),
+            actionLink(ns("submit_another"), "Submit another response")
+          )
+        ),
+        shinyjs::hidden(
+          actionLink(ns("showhide"),
+                     class = "showhide",
+                     "Show responses (Admin only)")
+        ),
+        
+        shinyjs::hidden(div(
+          id = ns("answers"),
+          class = "answers",
+          div(class = "pw-box", id = ns("pw-box"),
+              passwordInput(ns("adminpw"), "Password"),
+              actionButton(ns("submitPw"), "Log in")
+          ),
+          shinyjs::hidden(div(id = ns("showAnswers"),
+                              downloadButton(ns("downloadBtn"), "Download responses"),
+                              DT::dataTableOutput(ns("responsesTable"))
+          ))
+        )),
+        
+        div(class = "created-by",
+            "Created with",
+            a(href = "https://github.com/daattali/shinyforms", "shinyforms")
+        )
+      )
+    }})
+  formUI <- list(formUI,submitForm)
+  return(formUI)
+  
 }
 
 #' @export
@@ -205,10 +211,6 @@ formServerHelper <- function(input, output, session, formInfo) {
     mandatoryFilled <- all(mandatoryFilled)
     
     shinyjs::toggleState(id = "submit", condition = mandatoryFilled)
-  })
-  
-  observeEvent(input$reset, {
-    shinyjs::reset("form")
   })
   
   # When the Submit button is clicked, submit the response
@@ -283,7 +285,7 @@ formServerHelper <- function(input, output, session, formInfo) {
   observeEvent(input$showhide, {
     shinyjs::toggle("answers")
   })
-
+  
   observeEvent(input$submitPw, {
     if (input$adminpw == formInfo$password) {
       values$adminVerified <- TRUE
@@ -291,7 +293,7 @@ formServerHelper <- function(input, output, session, formInfo) {
       shinyjs::hide("pw-box")
     }
   })
-
+  
   # Allow admins to download responses
   output$downloadBtn <- downloadHandler(
     filename = function() {
@@ -301,19 +303,4 @@ formServerHelper <- function(input, output, session, formInfo) {
       write.csv(loadData(formInfo$storage), file, row.names = FALSE)
     }
   )
-}
-
-createFormInfo <- function(id, questions, storage, name, multiple = TRUE,
-                           password) {
-  # as.yaml
-}
-
-#' @export
-createFormApp <- function(formInfo) {
-  
-}
-
-inlineInput <- function(tag) {
-  stopifnot(inherits(tag, "shiny.tag"))
-  tagAppendAttributes(tag, style = "display: inline-block;")
 }
