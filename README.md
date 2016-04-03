@@ -17,7 +17,7 @@ The idea of `shinyforms` is to let you create questions/polls/surveys as Shiny a
 
 #### But, why?
 
-Good question.  You should read my [blog post](http://deanattali.com/2015/06/14/mimicking-google-form-shiny/) where I discuss how to mimick Google Forms with Shiny, and why I originally needed to do it. I've created a few Shiny apps that request user input and save it somewhere, and I wanted to make it super streamlined for anyone else to do so in the future.
+Good question.  You should read my [blog post](http://deanattali.com/2015/06/14/mimicking-google-form-shiny/) where I discuss how to mimick Google Forms with Shiny, and why I originally needed to do it. I've created a few Shiny apps that request user input and save it somewhere, and I wanted to make it super streamlined for anyone else to do so in the future.  You can see an live example of a Shiny form [here](http://daattali.com/shiny/mimic-google-form/).
 
 #### How do I use this?
 
@@ -84,16 +84,13 @@ Of course you could put more stuff in the app, but this is the beauty of it, the
 - Supported question types: text, numeric, checkbox
 - Ability to submit multiple responses for the same form (use `multiple = FALSE` in the form info list to disallow multiple submissions)
 - Admin mode support: if you add `?admin=1` to the URL, you will see buttons for viewing all submitted responses below each form.  If you want to see all responses, you'll have to enter a password to verify you're an admin (since anybody can just modify the URL). The password is provided by the `password` in the form info list. 
+- Support for more complex input validation that gives nice error messages when a field does not meet certain conditions (use the `validations` option in the form info)
+- Can have an optional "Reset" button that resets the fields in the form (use the `reset = TRUE` parameter in the form info)
+- Questions can have hint text, which is text just below the question title that gives a longer description (use the `hint` parameter of a question)
 
 #### Future features
 
-- Responses can be saved to MySQL, SQLite, MongoDB, Dropbox, Google Sheets, Amazon S3 (I already have a working app with all these storage types, you can see it [here](http://daattali.com/shiny/persistent-data-storage/))
-- Supported question types: all the input types in Shiny
-- Support a "other" option where the user can fill out his own answer for a text question
-- Create a Shiny app that lets you easily create the form visually (drag-n-drop questions instead of creating an R list)
-- Questions and form data are in the format of JSON/YAML
-- Can generate a full Shiny app instead of only the UI and server pieces? This would be useful for complete beginners who don't want to create anything in Shiny themselves, and just want the entire app to be the form
-- Add support for more complex input validation before allowing the submit button to be clicked
+You can see all the features I want to support [here](https://github.com/daattali/shinyforms/issues) (but it might take some time because I can't devote too much time to this package right now)
 
 #### Another example
 
@@ -107,7 +104,8 @@ library(shinyforms)
 basicInfoForm <- list(
   id = "basicinfo",
   questions = list(
-    list(id = "name", type = "text", title = "Name", mandatory = TRUE),
+    list(id = "name", type = "text", title = "Name", mandatory = TRUE,
+         hint = "Your name exactly as it is shown on your passport"),
     list(id = "age", type = "numeric", title = "Age", mandatory = FALSE),
     list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
     list(id = "terms", type = "checkbox", title = "I agree to the terms")
@@ -117,7 +115,14 @@ basicInfoForm <- list(
     path = "responses"
   ),
   name = "Personal info",
-  password = "shinyforms"
+  password = "shinyforms",
+  reset = TRUE,
+  validations = list(
+    list(condition = "nchar(input$name) >= 3",
+         message = "Name must be at least 3 characters"),
+    list(condition = "input$terms == TRUE",
+         message = "You must agree to the terms")
+  )
 )
 
 # Define the second form: soccer
@@ -156,7 +161,7 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 ```
 
-Notice how easy this is? After defining the forms with R lists, it's literally two function calls for each form to get it set up. A couple things to note: first, the soccer form uses the `multiple = FALSE` option, which means the user can only submit once (if you restart the Shiny app, he'd be able to submit again).  Secondly, the first form uses the `password` option, which means that the admin table will be available IF you add `?admin=1` to the URL. To see the responses from the admin table, click on "Show responses" and type in the password "shinyforms".
+Notice how easy this is? After defining the forms with R lists, it's literally two function calls for each form to get it set up. A couple things to note: first, the soccer form uses the `multiple = FALSE` option, which means the user can only submit once (if you restart the Shiny app, he'd be able to submit again).  Secondly, the first form uses the `password` option, which means that the admin table will be available IF you add `?admin=1` to the URL. To see the responses from the admin table, click on "Show responses" and type in the password "shinyforms". This app also uses several other features.
 
 #### Feedback
 

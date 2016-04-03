@@ -19,14 +19,16 @@ labelMandatory <- function(label) {
 }
 
 appCSS <- "
-.shinyforms-ui .mandatory_star { color: red; }
-.shinyforms-ui .shiny-input-container { margin-top: 25px; font-size: 16px; }
-.shinyforms-ui .action-button { font-size: 16px; }
+.shinyforms-ui .mandatory_star { color: #db4437; font-size: 20px; line-height: 0; }
+.shinyforms-ui .sf-questions { margin-bottom: 30px; }
+.shinyforms-ui .sf-question { margin-top: 25px; font-size: 16px; }
+.shinyforms-ui .question-hint { font-size: 14px; color: #737373; font-weight: normal; }
+.shinyforms-ui .action-button.btn { font-size: 16px; margin-right: 10px; }
 .shinyforms-ui .thankyou_msg { margin-top: 10px; }
 .shinyforms-ui .showhide { margin-top: 10px; display: inline-block; }
-.shinyforms-ui .sf_submit_msg { margin-left: 10px; font-weight: bold; }
+.shinyforms-ui .sf_submit_msg { font-weight: bold; }
 .shinyforms-ui .sf_error { margin-top: 15px; color: red; }
-.shinyforms-ui .answers { margin-top: 10px; }
+.shinyforms-ui .answers { margin-top: 25px; }
 .shinyforms-ui .pw-box { margin-top: -20px; }
 .shinyforms-ui .created-by { font-size: 12px; font-style: italic; color: #777; margin: 25px auto 10px;}
 "
@@ -105,25 +107,43 @@ formUI <- function(formInfo) {
     div(
       id = ns("form"),
       titleElement,
-      lapply(
-        questions,
-        function(question) {
-          label <- question$title
-          if (question$id %in% fieldsMandatory) {
-            label <- labelMandatory(label)
+      div(
+        class = "sf-questions",
+        lapply(
+          questions,
+          function(question) {
+            label <- question$title
+            if (question$id %in% fieldsMandatory) {
+              label <- labelMandatory(label)
+            }
+            
+            if (question$type == "text") {
+              input <- textInput(ns(question$id), NULL, "")
+            } else if (question$type == "numeric") {
+              input <- numericInput(ns(question$id), NULL, 0)
+            } else if (question$type == "checkbox") {
+              input <- checkboxInput(ns(question$id), label, FALSE)
+            }
+
+            div(
+              class = "sf-question",
+              if (question$type != "checkbox") {
+                tags$label(
+                  `for` = ns(question$id),
+                  class = "sf-input-label",
+                  label,
+                  if (!is.null(question$hint)) {
+                    div(class = "question-hint", question$hint)
+                  }
+                )
+              },
+              input
+            )
           }
-          
-          if (question$type == "text") {
-            textInput(ns(question$id), label, "")
-          } else if (question$type == "numeric") {
-            numericInput(ns(question$id), label, 0)
-          } else if (question$type == "checkbox") {
-            checkboxInput(ns(question$id), label, FALSE)
-          }
-        }
+        )
       ),
       actionButton(ns("submit"), "Submit", class = "btn-primary"),
-      if(!is.null(formInfo$reset) && formInfo$reset) {
+      if (!is.null(formInfo$reset) && formInfo$reset) {
         actionButton(ns("reset"), "Reset")
       },
       shinyjs::hidden(
@@ -209,11 +229,12 @@ formServerHelper <- function(input, output, session, formInfo) {
   
   observeEvent(input$reset, {
     shinyjs::reset("form")
+    shinyjs::hide("error")
   })
   
   # When the Submit button is clicked, submit the response
   observeEvent(input$submit, {
-    
+
     # User-experience stuff
     shinyjs::disable("submit")
     shinyjs::show("submit_msg")
@@ -222,6 +243,28 @@ formServerHelper <- function(input, output, session, formInfo) {
       shinyjs::enable("submit")
       shinyjs::hide("submit_msg")
     })
+
+    if (!is.null(formInfo$validations)) {
+      errors <- unlist(lapply(
+        formInfo$validations, function(validation) {
+          if (!eval(parse(text = validation$condition))) {
+            return(validation$message)
+          } else {
+            return()
+          }
+        }
+      ))
+      if (length(errors) > 0) {
+        shinyjs::show(id = "error", anim = TRUE, animType = "fade")
+        if (length(errors) == 1) {
+          shinyjs::html("error_msg", errors[1])  
+        } else {
+          errors <- c("", errors)
+          shinyjs::html("error_msg", paste(errors, collapse = "<br>&bull; "))
+        }
+        return()
+      }
+    }
     
     # Save the data (show an error message in case of error)
     tryCatch({

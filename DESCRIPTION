@@ -3,7 +3,7 @@ Title: Description
 Version: 0.0.0.9000
 Authors@R: person("Dean", "Attali", email = "daattali@gmail.com",
     role = c("aut", "cre"))
-Description: Description
+Description: TODO
 URL: https://github.com/daattali/shinyforms
 BugReports: https://github.com/daattali/shinyforms/issues
 Depends:
@@ -16,7 +16,6 @@ Suggests:
     knitr (>= 1.7),
     rmarkdown
 License: MIT + file LICENSE
-SystemRequirements: pandoc with https support
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
