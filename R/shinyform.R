@@ -19,15 +19,16 @@ labelMandatory <- function(label) {
 }
 
 appCSS <- "
-.mandatory_star { color: red; }
-.shiny-input-container { margin-top: 25px; }
-.thankyou_msg { margin-top: 10px; }
-.showhide { margin-top: 10px; display: inline-block; }
-.sf_submit_msg { margin-left: 10px; font-weight: bold; }
-.sf_error { margin-top: 15px; color: red; }
-.answers { margin-top: 10px; }
-.pw-box { margin-top: -20px; }
-.created-by { font-size: 12px; font-style: italic; color: #777; margin: 25px auto 10px;}
+.shinyforms-ui .mandatory_star { color: red; }
+.shinyforms-ui .shiny-input-container { margin-top: 25px; font-size: 16px; }
+.shinyforms-ui .action-button { font-size: 16px; }
+.shinyforms-ui .thankyou_msg { margin-top: 10px; }
+.shinyforms-ui .showhide { margin-top: 10px; display: inline-block; }
+.shinyforms-ui .sf_submit_msg { margin-left: 10px; font-weight: bold; }
+.shinyforms-ui .sf_error { margin-top: 15px; color: red; }
+.shinyforms-ui .answers { margin-top: 10px; }
+.shinyforms-ui .pw-box { margin-top: -20px; }
+.shinyforms-ui .created-by { font-size: 12px; font-style: italic; color: #777; margin: 25px auto 10px;}
 "
 
 saveData <- function(data, storage) {
@@ -92,9 +93,15 @@ formUI <- function(formInfo) {
     titleElement <- h2(formInfo$name)
   }
   
-  tagList(
+  responseText <- "Thank you, your response was submitted successfully."
+  if (!is.null(formInfo$responseText)) {
+    responseText <- formInfo$responseText
+  }
+  
+  div(
     shinyjs::useShinyjs(),
     shinyjs::inlineCSS(appCSS),
+    class = "shinyforms-ui",
     div(
       id = ns("form"),
       titleElement,
@@ -116,6 +123,9 @@ formUI <- function(formInfo) {
         }
       ),
       actionButton(ns("submit"), "Submit", class = "btn-primary"),
+      if(!is.null(formInfo$reset) && formInfo$reset) {
+        actionButton(ns("reset"), "Reset")
+      },
       shinyjs::hidden(
         span(id = ns("submit_msg"),
              class = "sf_submit_msg",
@@ -130,21 +140,24 @@ formUI <- function(formInfo) {
       div(
         id = ns("thankyou_msg"),
         class = "thankyou_msg",
-        h3("Thanks, your response was submitted successfully!"),
+        strong(responseText), br(),
         actionLink(ns("submit_another"), "Submit another response")
       )
     ),
     shinyjs::hidden(
       actionLink(ns("showhide"),
                  class = "showhide",
-                 "Show responses (Admin only)")
+                 "Show responses")
     ),
     
     shinyjs::hidden(div(
       id = ns("answers"),
       class = "answers",
-      div(class = "pw-box", id = ns("pw-box"),
-        passwordInput(ns("adminpw"), "Password"),
+      div(
+        class = "pw-box", id = ns("pw-box"),
+        inlineInput(
+          passwordInput(ns("adminpw"), NULL, placeholder = "Password")
+        ),
         actionButton(ns("submitPw"), "Log in")
       ),
       shinyjs::hidden(div(id = ns("showAnswers"),
@@ -192,6 +205,10 @@ formServerHelper <- function(input, output, session, formInfo) {
     mandatoryFilled <- all(mandatoryFilled)
     
     shinyjs::toggleState(id = "submit", condition = mandatoryFilled)
+  })
+  
+  observeEvent(input$reset, {
+    shinyjs::reset("form")
   })
   
   # When the Submit button is clicked, submit the response
@@ -284,4 +301,19 @@ formServerHelper <- function(input, output, session, formInfo) {
       write.csv(loadData(formInfo$storage), file, row.names = FALSE)
     }
   )
+}
+
+createFormInfo <- function(id, questions, storage, name, multiple = TRUE,
+                           password) {
+  # as.yaml
+}
+
+#' @export
+createFormApp <- function(formInfo) {
+  
+}
+
+inlineInput <- function(tag) {
+  stopifnot(inherits(tag, "shiny.tag"))
+  tagAppendAttributes(tag, style = "display: inline-block;")
 }
