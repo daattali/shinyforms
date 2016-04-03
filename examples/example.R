@@ -7,6 +7,8 @@ basicInfoForm <- list(
   questions = list(
     list(id = "name", type = "text", title = "Name", mandatory = TRUE),
     list(id = "age", type = "numeric", title = "Age", mandatory = FALSE),
+    list(id = "date", type = "date", title = "Date", mandatory = FALSE),
+    list(id = "slider", type = "slider", title = "Slider", mandatory = FALSE, min = 1,max = 10,value = 1),
     list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
     list(id = "terms", type = "checkbox", title = "I agree to the terms")
   ),
