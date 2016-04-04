@@ -104,7 +104,7 @@ library(shinyforms)
 basicInfoForm <- list(
   id = "basicinfo",
   questions = list(
-    list(id = "name", type = "text", title = "Name", mandatory = TRUE, value = "", placeholder = "Add full name here", # placeholder not working?
+    list(id = "name", type = "text", title = "Name", mandatory = TRUE, value = "", placeholder = "Add full name here", 
          hint = "Your name exactly as it is shown on your passport", width = 350),
     list(id = "age", type = "numeric", title = "Age", min = 0, max = 150, value = 0, step = 1, mandatory = FALSE, hint = "Age between: 0-150"),
     list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
