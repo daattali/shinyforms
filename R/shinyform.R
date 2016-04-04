@@ -123,7 +123,11 @@ formUI <- function(formInfo) {
               input <- numericInput(ns(question$id), NULL, 0)
             } else if (question$type == "checkbox") {
               input <- checkboxInput(ns(question$id), label, FALSE)
-            }
+            } else if (question$type == "date") {
+              dateInput(ns(question$id), label, FALSE)}
+            else if (question$type == "slider") {
+              sliderInput(ns(question$id), label, min = question$min, max = question$max, value = question$value,
+                          step = question$step)}
 
             div(
               class = "sf-question",
