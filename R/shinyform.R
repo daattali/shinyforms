@@ -118,16 +118,47 @@ formUI <- function(formInfo) {
             }
             
             if (question$type == "text") {
-              input <- textInput(ns(question$id), NULL, "")
+              input <- textInput(ns(question$id), label = NULL, value = question$value, placeholder = question$placeholder, 
+                          width = question$width)
             } else if (question$type == "numeric") {
-              input <- numericInput(ns(question$id), NULL, 0)
+              input <- numericInput(ns(question$id), label = NULL, value = question$value, min = question$min,
+                          max = question$max, step = question$step, width = question$width)
             } else if (question$type == "checkbox") {
-              input <- checkboxInput(ns(question$id), label, FALSE)
+              input <- checkboxInput(ns(question$id), label, value = question$value, width = question$width)
+            } else if (question$type == "dateRange") {
+              input <- dateRangeInput(ns(question$id), label = NULL, start = question$start, end = question$end,
+                          min = question$min, max = question$max, format = question$format, startview = question$startview,
+                          weekstart = question$weekstart, language = question$language, width = question$width)
             } else if (question$type == "date") {
-              dateInput(ns(question$id), label, FALSE)}
-            else if (question$type == "slider") {
-              sliderInput(ns(question$id), label, min = question$min, max = question$max, value = question$value,
-                          step = question$step)}
+              input <- dateInput(ns(question$id), label = NULL, value = question$value,
+                          min = question$min, max = question$max, format = question$format, startview = question$startview,
+                          weekstart = question$weekstart, language = question$language, width = question$width)
+            } else if (question$type == "slider") {
+              input <- sliderInput(ns(question$id), label = NULL, min = question$min, max = question$max,
+                          value = question$value, step = question$step, round = question$round,
+                          ticks = question$ticks, animate = question$animate,
+                          width = question$width, sep = question$sep, pre = question$pre, post = question$post,
+                          timeFormat = question$timeFormat,
+                          timezone = question$timezone, dragRange = question$dragRange)
+            } else if (question$type == "radio") {
+              input <- radioButtons(ns(question$id), choices = question$choices, NULL)
+            } else if (question$type == "select") {
+              input <- selectInput(ns(question$id), label = NULL, choices = question$choices, selected = question$selected,
+                          multiple = question$multiple, selectize = question$selectize, width = question$width, 
+                          size = question$size)
+            } else if (question$type == "checkboxGroup") {
+              input <- checkboxGroupInput(ns(question$id), label = NULL, choices = question$choices, selected =  question$selected,
+                                inline = question$inline, width = question$width)
+            } 
+            textareaInput <- function(id, value, placeholder, title, label, width = NULL){
+              div(class = "form-group shiny-input-container",  style = if (!is.null(width)) 
+                paste0("width: ", validateCssUnit(width), ";"), tags$textarea(id = id, rows = 3, cols = 41, type = "textarea", value = value, 
+                                                                                        placeholder = placeholder))
+            }
+            
+            if (question$type == "textarea") {
+              input <- textareaInput(ns(question$id), value = question$value, placeholder = question$placeholder)
+            }
 
             div(
               class = "sf-question",
