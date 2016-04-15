@@ -124,7 +124,11 @@ basicInfoForm <- list(
                                             "Transmission" = "am", "Gears" = "gear"), multiple = FALSE, selectize = TRUE),
    list(id = "area", type = "textarea", title = "Area Box", mandatory = FALSE, value = "", placeholder = "description...", # placeholder not working?
         hint = "free text description", width = 400)
-  ),
+          list(id = "image", type = "image", src = "https://upload.wikimedia.org/wikipedia/en/d/d4/Mickey_Mouse.png", height = 300, width = 300),
+     list(id = "test", type = "select", title = "How's this?", choices = c("Batman" = "Bat",
+                                                                           "Superman" = "Super", "Mickey Mouse" = "Mickey"),
+   
+       multiple = FALSE, selectize = TRUE)),
   storage = list(
     type = STORAGE_TYPES$FLATFILE,
     path = "responses"

@@ -160,6 +160,16 @@ formUI <- function(formInfo) {
             if (question$type == "textarea") {
               input <- textareaInput(ns(question$id), value = question$value, placeholder = question$placeholder)
             }
+           # image only, no input
+            imageInput <- function(src =  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Steve_Wozniak.jpg/800px-Steve_Wozniak.jpg", width = 300, height= 300) {
+            img(src = src, 
+                height = 400, width = 400)
+              }
+        
+            if (question$type == "image") {
+              input <- imageInput(src = question$src, 
+                                  height = question$height, width = question$width)
+            }
 
             div(
               class = "sf-question",
