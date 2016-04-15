@@ -150,6 +150,7 @@ formUI <- function(formInfo) {
               input <- checkboxGroupInput(ns(question$id), label = NULL, choices = question$choices, selected =  question$selected,
                                 inline = question$inline, width = question$width)
             } 
+            # create textarea input html:
             textareaInput <- function(id, value, placeholder, title, label, width = NULL){
               div(class = "form-group shiny-input-container",  style = if (!is.null(width)) 
                 paste0("width: ", validateCssUnit(width), ";"), tags$textarea(id = id, rows = 3, cols = 41, type = "textarea", value = value, 
@@ -211,7 +212,7 @@ formUI <- function(formInfo) {
       div(
         class = "pw-box", id = ns("pw-box"),
         inlineInput(
-          passwordInput(ns("adminpw"), NULL, placeholder = "Password")
+          passwordInput(ns("adminpw"), NULL)
         ),
         actionButton(ns("submitPw"), "Log in")
       ),
