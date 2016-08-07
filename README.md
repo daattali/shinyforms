@@ -1,6 +1,8 @@
 # shinyforms - Easily create questionnaire-type forms with Shiny 
 
-**Note: This is very much a work in progress in its baby stages. This package only has one day's worth of work in it.  It's functional and works on a basic level, but there are many many more awesome things planned. Work on this package is temporarily halted until I graduate because I have to focus on my thesis for a few weeks! :(**
+> *Copyright 2016 [Dean Attali](http://deanattali.com). Licensed under the MIT license.*
+
+**Note: This is very much a work in progress in its baby stages. This package only has one day's worth of work in it.  It's functional and works on a basic level, but there are many many more awesome things planned. Work on this package is temporarily halted until I find some time to work on it.**
 
 - [What does shinyforms do?](#what-does-shinyforms-do)
 - [But, why?](#buy-why)
