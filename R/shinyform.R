@@ -344,6 +344,11 @@ formServerHelper <- function(input, output, session, formInfo) {
       write.csv(loadData(formInfo$storage), file, row.names = FALSE)
     }
   )
+  return(
+      reactive({
+        input$submit
+      })
+  )
 }
 
 createFormInfo <- function(id, questions, storage, name, multiple = TRUE,

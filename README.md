@@ -77,6 +77,16 @@ shinyApp(ui = ui, server = server)
 
 Of course you could put more stuff in the app, but this is the beauty of it, the form is a "module" that you can just plug into any Shiny app anywhere you want. Every time you submit a response, it will be saved as a file in the `responses` directory. This example is the most basic usage.
 
+Additionally, `formServer` may be used like a reactive function that sends a signal when the form is submit. This is useful for refreshing tables after a form is filled out.
+
+```r
+trigger <- formServer(basicInfoForm)
+output$my_table <- renderDataTable({
+  trigger()
+  mtcars
+})
+```
+
 #### Current features
 
 - Responses are saved to local files
