@@ -1,10 +1,11 @@
 # shinyforms - Easily create questionnaire-type forms with Shiny 
 
+[![Donate](http://i.imgur.com/vCIGFrH.png)](https://www.paypal.me/daattali)
 [![saythanks](http://i.imgur.com/L88apDa.png)](https://saythanks.io/to/daattali)
 
 > *Copyright 2016 [Dean Attali](http://deanattali.com). Licensed under the MIT license.*
 
-**Note: This is very much a work in progress in its baby stages. This package only has one day's worth of work in it.  It's functional and works on a basic level, but there are many many more awesome things planned. Work on this package is temporarily halted until I find some time to work on it.**
+## Note: This is very much a work in progress in its baby stages. This package only has one day's worth of work in it.  It's functional and works on a basic level, but there are many many more awesome things planned. I receive a lot of emails about this package, please understand it is not ready for production as it needs a lot more development. I am working on other projects as well and find it hard to find the time shinyforms deserves. If you would like to help fund/sponsor the development of shinyforms, please get in touch!
 
 - [What does shinyforms do?](#what-does-shinyforms-do)
 - [But, why?](#buy-why)
