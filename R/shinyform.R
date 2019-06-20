@@ -1,5 +1,5 @@
 library(shiny)
-
+library(checkmate)
 
 
 #' @title STORAGE_TYPES
@@ -498,14 +498,48 @@ createFormInfo <- function(id, questions, storage, name, multiple = TRUE,
 
 #' @title createFormApp
 #'
-#' @description
+#' @description Creates a shinyform from a list of parameters
 #'
-#' @param formInfo
+#' @param formInfo A list with param: id, questions and storage
+#' 
+#' @example 
+#' library(shiny)
+#' library(shinyforms)
+#' 
+#' questions <- list(
+#'   list(id = "name", type = "text", title = "Name", mandatory = TRUE),
+#'   list(id = "age", type = "numeric", title = "Age"),
+#'   list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
+#'   list(id = "terms", type = "checkbox", title = "I agree to the terms")
+#' )
+#' formInfo <- list(
+#'   id = "basicinfo",
+#'   questions = questions,
+#'   storage = list(
+#'     # Right now, only flat file storage is supported
+#'     type = STORAGE_TYPES$FLATFILE,
+#'     # The path where responses are stored
+#'     path = "responses"
+#'   )
+#' )
+#' 
+#' createFormApp(formInfo)
 #'
 #' @export
 createFormApp <- function(formInfo) {
-  
+  if (is.null(formInfo) || !checkmate::testList(formInfo)) {
+    stop("`formInfo` missing from shinyApp")
+  }
+  ui <- fluidPage(
+    formUI(formInfo)
+  )
+  server <- function(input, output, session) {
+    formServer(formInfo)
+  }
+  shiny::shinyApp(ui = ui, server = server)
 }
+
+
 
 
 

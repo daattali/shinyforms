@@ -15,7 +15,8 @@ Imports:
     shinyjs (>= 0.5.2)
 Suggests:
     knitr (>= 1.7),
-    rmarkdown
+    rmarkdown,
+    testthat
 Remotes: rstudio/shiny
 License: MIT + file LICENSE
 LazyData: true
