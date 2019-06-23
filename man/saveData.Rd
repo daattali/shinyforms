@@ -7,11 +7,14 @@
 saveData(data, storage)
 }
 \arguments{
-\item{data}{Dataframe taken from input shiny object}
+\item{data}{Dataframe taken from input shiny object.}
 
 \item{storage}{A list with variable type defining users perferred type of storage}
 }
 \description{
 Takes data from your shinyforms inputs and passes it to a storage type.
+}
+\details{
+Currently only provides storage of flat files (.csv) or google doc sheet.
 }
 \keyword{internal}

@@ -7,9 +7,9 @@
 inlineInput(tag)
 }
 \arguments{
-\item{tag}{}
+\item{tag}{defined inline object}
 }
 \description{
-
+Allows inline inputs to be entered i.e. for passwords and username of admins
 }
 \keyword{internal}

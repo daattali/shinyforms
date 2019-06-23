@@ -9,10 +9,12 @@
 STORAGE_TYPES
 }
 \value{
-A list of storage types.
+A list of storage types available to shinyform.
 }
 \description{
 A list of all the available storage types for shinyforms.
+}
+\details{
 List: FLATFILE, SQLITE, MYSQL, MONGO, GOOGLE_SHEETS, DROPBOX, AMAZON_S3
 }
 \keyword{datasets}

@@ -5,9 +5,10 @@ library(checkmate)
 #' @title STORAGE_TYPES
 #'
 #' @description A list of all the available storage types for shinyforms.
-#' List: FLATFILE, SQLITE, MYSQL, MONGO, GOOGLE_SHEETS, DROPBOX, AMAZON_S3
+#' 
+#' @details List: FLATFILE, SQLITE, MYSQL, MONGO, GOOGLE_SHEETS, DROPBOX, AMAZON_S3
 #'
-#' @return A list of storage types.
+#' @return A list of storage types available to shinyform.
 #'
 #' @export
 STORAGE_TYPES <- list(
@@ -22,9 +23,11 @@ STORAGE_TYPES <- list(
 
 
 
-#' Adds a tag list with the inputted label as a parameter.
+#' @title labelMandatory
 #' 
-#' @param label A string.
+#' @description Adds a mandaotory star to a labelled question.
+#' 
+#' @param label A string representing the mandatory question.
 #' 
 #' @return A tag list
 #' 
@@ -38,9 +41,9 @@ labelMandatory <- function(label) {
 
 
 
-#' @title  appCSS
+#' @title  appCSS 
 #' 
-#' @description shiny app define CSS format
+#' @description shinyform app defined CSS format
 #' 
 #' @keywords internal
 appCSS <- "
@@ -65,7 +68,9 @@ appCSS <- "
 #'
 #' @description Takes data from your shinyforms inputs and passes it to a storage type.
 #'
-#' @param data Dataframe taken from input shiny object
+#' @details Currently only provides storage of flat files (.csv) or google doc sheet.
+#'
+#' @param data Dataframe taken from input shiny object.
 #' 
 #' @param storage A list with variable type defining users perferred type of storage
 #' 
@@ -84,8 +89,10 @@ saveData <- function(data, storage) {
 #' @title loadData
 #'
 #' @description Passes data from a storage type and passes it back to shiny.
+#' 
+#' @details Currently only provides storage of flat files (.csv).
 #'
-#' @param storage A list with variable type defining users perferred type of storage
+#' @param storage A list with variable type defining users perferred type of storage.
 #' 
 #' @keywords internal
 loadData <- function(storage) {
@@ -101,11 +108,13 @@ loadData <- function(storage) {
 
 #' @title saveDataFlatfile
 #'
-#' @description Takes data from your shinyforms inputs and saves it to a flat file
+#' @description Takes data from your shinyforms inputs and saves it to a flat file.
+#' 
+#' @details Writes form inputs to a storage type and names it using a timestamp.
 #'
 #' @param data Dataframe taken from input shiny object
 #' 
-#' @param storage A list with variable type defining users perferred type of storage
+#' @param storage A list with variable type defining users perferred type of storage and storage path
 #' 
 #' @keywords internal
 saveDataFlatfile <- function(data, storage) {
@@ -151,7 +160,7 @@ loadDataFlatfile <- function(storage) {
 #'
 #' @param data Dataframe taken from input shiny object
 #' 
-#' @param storage A list with variable type defining users perferred type of storage
+#' @param storage A list with variable type defining users perferred type of storage and storage key
 #' 
 #' @keywords internal
 saveDataGsheets <- function(data, storage) {
@@ -164,7 +173,7 @@ saveDataGsheets <- function(data, storage) {
 #'
 #' @description Takes data from a google doc file and passes it to your shiny app.
 #'
-#' @param storage A list with variable type defining users perferred type of storage
+#' @param storage A list with variable type defining users perferred type of storage and storage key
 #' 
 #' @keywords internal
 loadDataGsheets <- function() {
@@ -173,14 +182,50 @@ loadDataGsheets <- function() {
 
 
 
-#' @title formInfo
+#' @title formUI
 #'
-#' @description
-#'
-#' @param formInfo
+#' @description Creates the UI form component for shinyforms. 
 #' 
+#' @details Takes a list, formInfo, and creates the shiny UI components using the questions list
+#'
+#' @param formInfo A list with param: id, questions and storage 
+#' 
+#' @examples  
+#' 
+#' library(shiny)
+#' library(shinyforms)
+#'
+#' questions <- list(
+#'   list(id = "name", type = "text", title = "Name", mandatory = TRUE),
+#'   list(id = "age", type = "numeric", title = "Age"),
+#'   list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
+#'   list(id = "terms", type = "checkbox", title = "I agree to the terms")
+#' )
+#' formInfo <- list( 
+#' id = "basicinfo",
+#' questions = questions,
+#' storage = list(
+#'   # Right now, only flat file storage is supported
+#'   type = STORAGE_TYPES$FLATFILE,
+#'   # The path where responses are stored
+#'   path = "responses"
+#' )
+#' )
+#' ui <- fluidPage(
+#'   formUI(formInfo)
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   formServer(formInfo)
+#' }
+#'
+#' shinyApp(ui = ui, server = server)
+#'
 #' @export
 formUI <- function(formInfo) {
+  if (is.null(formInfo) || !checkmate::testList(formInfo)) {
+    stop("`formInfo` missing from shinyApp")
+  }
   
   ns <- NS(formInfo$id)
   
@@ -299,10 +344,43 @@ formUI <- function(formInfo) {
 #'
 #' @description
 #'
-#' @param formInfo
+#' @param formInfo A list with param: id, questions and storage
+#' 
+#' @examples 
+#' library(shiny)
+#' library(shinyforms)
+#'
+#' questions <- list(
+#'   list(id = "name", type = "text", title = "Name", mandatory = TRUE),
+#'   list(id = "age", type = "numeric", title = "Age"),
+#'   list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
+#'   list(id = "terms", type = "checkbox", title = "I agree to the terms")
+#' )
+#' formInfo <- list(
+#' id = "basicinfo",
+#' questions = questions,
+#' storage = list(
+#'   # Right now, only flat file storage is supported
+#'   type = STORAGE_TYPES$FLATFILE,
+#'   # The path where responses are stored
+#'   path = "responses"
+#' )
+#' )
+#' ui <- fluidPage(
+#'   formUI(formInfo)
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   formServer(formInfo)
+#' }
+#'
+#' shinyApp(ui = ui, server = server)
 #' 
 #' @export
 formServer <- function(formInfo) {
+  if (is.null(formInfo) || !checkmate::testList(formInfo)) {
+    stop("`formInfo` missing from shinyApp")
+  }
   callModule(formServerHelper, formInfo$id, formInfo)
 }
 
@@ -319,7 +397,7 @@ formServer <- function(formInfo) {
 #' 
 #' @param session
 #' 
-#' @param formInfo
+#' @param formInfo A list with param: id, questions and storage
 #' 
 #' @keywords internal
 formServerHelper <- function(input, output, session, formInfo) {
@@ -475,17 +553,17 @@ formServerHelper <- function(input, output, session, formInfo) {
 
 #' @title createFormInfo
 #'
-#' @description
+#' @description Created a yaml file for configuring shinyforms
 #'
-#' @param id
+#' @param id String name of the form
 #' 
-#' @param questions
+#' @param questions list of form questions
 #' 
-#' @param storage
+#' @param storage a list of different storage types, path and keys
 #' 
-#' @param name
+#' @param name String name of the app
 #' 
-#' @param multiple
+#' @param multiple boolean 
 #' 
 #' @keywords internal
 createFormInfo <- function(id, questions, storage, name, multiple = TRUE,
@@ -498,11 +576,12 @@ createFormInfo <- function(id, questions, storage, name, multiple = TRUE,
 
 #' @title createFormApp
 #'
-#' @description Creates a shinyform from a list of parameters
+#' @description Creates a shinyform app from the defined questions and parameters set in formInfo.
 #'
 #' @param formInfo A list with param: id, questions and storage
 #' 
-#' @example 
+#' @examples 
+#' 
 #' library(shiny)
 #' library(shinyforms)
 #' 
@@ -546,9 +625,9 @@ createFormApp <- function(formInfo) {
 
 #' @title inlineInput
 #'
-#' @description
+#' @description Allows inline inputs to be entered i.e. for passwords and username of admins
 #'
-#' @param tag
+#' @param tag defined inline object
 #' 
 #' @keywords internal
 inlineInput <- function(tag) {

@@ -7,17 +7,17 @@
 createFormInfo(id, questions, storage, name, multiple = TRUE, password)
 }
 \arguments{
-\item{id}{}
+\item{id}{String name of the form}
 
-\item{questions}{}
+\item{questions}{list of form questions}
 
-\item{storage}{}
+\item{storage}{a list of different storage types, path and keys}
 
-\item{name}{}
+\item{name}{String name of the app}
 
-\item{multiple}{}
+\item{multiple}{boolean}
 }
 \description{
-
+Created a yaml file for configuring shinyforms
 }
 \keyword{internal}

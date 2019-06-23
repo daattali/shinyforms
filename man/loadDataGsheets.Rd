@@ -7,7 +7,7 @@
 loadDataGsheets()
 }
 \arguments{
-\item{storage}{A list with variable type defining users perferred type of storage}
+\item{storage}{A list with variable type defining users perferred type of storage and storage key}
 }
 \description{
 Takes data from a google doc file and passes it to your shiny app.

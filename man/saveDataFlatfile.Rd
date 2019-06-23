@@ -9,9 +9,12 @@ saveDataFlatfile(data, storage)
 \arguments{
 \item{data}{Dataframe taken from input shiny object}
 
-\item{storage}{A list with variable type defining users perferred type of storage}
+\item{storage}{A list with variable type defining users perferred type of storage and storage path}
 }
 \description{
-Takes data from your shinyforms inputs and saves it to a flat file
+Takes data from your shinyforms inputs and saves it to a flat file.
+}
+\details{
+Writes form inputs to a storage type and names it using a timestamp.
 }
 \keyword{internal}

@@ -9,6 +9,6 @@
 appCSS
 }
 \description{
-shiny app define CSS format
+shinyform app defined CSS format
 }
 \keyword{internal}

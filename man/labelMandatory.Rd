@@ -2,17 +2,17 @@
 % Please edit documentation in R/shinyform.R
 \name{labelMandatory}
 \alias{labelMandatory}
-\title{Adds a tag list with the inputted label as a parameter.}
+\title{labelMandatory}
 \usage{
 labelMandatory(label)
 }
 \arguments{
-\item{label}{A string.}
+\item{label}{A string representing the mandatory question.}
 }
 \value{
 A tag list
 }
 \description{
-Adds a tag list with the inputted label as a parameter.
+Adds a mandaotory star to a labelled question.
 }
 \keyword{internal}

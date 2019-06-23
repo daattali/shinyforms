@@ -7,9 +7,12 @@
 loadData(storage)
 }
 \arguments{
-\item{storage}{A list with variable type defining users perferred type of storage}
+\item{storage}{A list with variable type defining users perferred type of storage.}
 }
 \description{
 Passes data from a storage type and passes it back to shiny.
+}
+\details{
+Currently only provides storage of flat files (.csv).
 }
 \keyword{internal}

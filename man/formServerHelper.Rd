@@ -13,7 +13,7 @@ formServerHelper(input, output, session, formInfo)
 
 \item{session}{}
 
-\item{formInfo}{}
+\item{formInfo}{A list with param: id, questions and storage}
 }
 \description{
 
