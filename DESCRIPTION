@@ -13,12 +13,11 @@ Imports:
     DT, 
     shiny (>= 0.13.2.9003),
     shinyjs (>= 0.5.2),
-    checkmate
+    rstudio/shiny
 Suggests:
     knitr (>= 1.7),
     rmarkdown,
     testthat
-Remotes: rstudio/shiny
 License: MIT + file LICENSE
 LazyData: true
 VignetteBuilder: knitr

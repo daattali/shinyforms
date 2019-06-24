@@ -2,7 +2,7 @@
 % Please edit documentation in R/shinyform.R
 \name{formUI}
 \alias{formUI}
-\title{formUI}
+\title{Creates the UI form component for shinyforms.}
 \usage{
 formUI(formInfo)
 }
@@ -17,7 +17,7 @@ Takes a list, formInfo, and creates the shiny UI components using the questions 
 }
 \examples{
  
-
+if (interactive()) {
 library(shiny)
 library(shinyforms)
 
@@ -46,5 +46,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server)
-
+}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/shinyform.R
 \name{formServer}
 \alias{formServer}
-\title{formServer}
+\title{Creates the server component for shinyforms}
 \usage{
 formServer(formInfo)
 }
@@ -10,9 +10,10 @@ formServer(formInfo)
 \item{formInfo}{A list with param: id, questions and storage}
 }
 \description{
-
+Creates the server component for shinyforms
 }
 \examples{
+if (interactive()) {
 library(shiny)
 library(shinyforms)
 
@@ -41,5 +42,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server)
-
+} 
 }

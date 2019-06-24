@@ -2,7 +2,7 @@
 % Please edit documentation in R/shinyform.R
 \name{createFormApp}
 \alias{createFormApp}
-\title{createFormApp}
+\title{Creates a shinyform app from the defined questions and parameters set in formInfo.}
 \usage{
 createFormApp(formInfo)
 }
@@ -13,6 +13,7 @@ createFormApp(formInfo)
 Creates a shinyform app from the defined questions and parameters set in formInfo.
 }
 \examples{
+if (interactive()) {
 
 library(shiny)
 library(shinyforms)
@@ -35,5 +36,5 @@ formInfo <- list(
 )
 
 createFormApp(formInfo)
-
+}
 }
