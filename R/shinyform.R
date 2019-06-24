@@ -13,6 +13,7 @@ testList <- function(listname){
 # A list of all the available storage types for shinyforms.
 # List: FLATFILE, SQLITE, MYSQL, MONGO, GOOGLE_SHEETS, DROPBOX, AMAZON_S3
 # A list of storage types available to shinyform.
+#' @export
 STORAGE_TYPES <- list(
   FLATFILE = "flatfile",
   SQLITE = "sqlite",
