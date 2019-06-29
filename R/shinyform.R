@@ -1,18 +1,16 @@
 library(shiny)
 
-# test whethere list is empty or not a list
-# @para listname a potential list to verify
-# returns FALSE if not a list or empty
+# Test whether a given object is a valid non-empty list
+# @param listname a potential list to verify
+# returns TRUE if the given object is a non-empty list, FALSE otherwise
 testList <- function(listname){
-  return(!is.null(listname) & 
-         length(listname) != 0 &
-         class(listname) == "list")
+  return(!is.null(listname) && 
+         length(listname) != 0 &&
+           "list" %in% class(listname))
 }
 
 
 # A list of all the available storage types for shinyforms.
-# List: FLATFILE, SQLITE, MYSQL, MONGO, GOOGLE_SHEETS, DROPBOX, AMAZON_S3
-# A list of storage types available to shinyform.
 #' @export
 STORAGE_TYPES <- list(
   FLATFILE = "flatfile",
@@ -27,7 +25,7 @@ STORAGE_TYPES <- list(
 
 
 # Adds a mandatory star to a labelled question.
-# label A string representing the mandatory question.
+# @param label A string representing the mandatory question.
 labelMandatory <- function(label) {
   tagList(
     label,
@@ -174,7 +172,7 @@ loadDataGsheets <- function() {
 #' @export
 formUI <- function(formInfo) {
   if (!testList(formInfo)) {
-    stop("`formInfo` missing from shinyApp")
+    stop("`formInfo` is not a valid list")
   }
   
   ns <- NS(formInfo$id)
@@ -328,7 +326,7 @@ formUI <- function(formInfo) {
 #' @export
 formServer <- function(formInfo) {
   if (!testList(formInfo)) {
-    stop("`formInfo` missing from shinyApp")
+    stop("`formInfo` is not a valid list")
   }
   callModule(formServerHelper, formInfo$id, formInfo)
 }
@@ -534,7 +532,7 @@ createFormInfo <- function(id, questions, storage, name, multiple = TRUE,
 #' @export
 createFormApp <- function(formInfo) {
   if (!testList(formInfo)) {
-    stop("`formInfo` missing from shinyApp")
+    stop("`formInfo` is not a valid list")
   }
   ui <- fluidPage(
     formUI(formInfo)

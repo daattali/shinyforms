@@ -12,9 +12,6 @@ formUI(formInfo)
 \description{
 Creates the UI form component for shinyforms.
 }
-\details{
-Takes a list, formInfo, and creates the shiny UI components using the questions list
-}
 \examples{
  
 if (interactive()) {

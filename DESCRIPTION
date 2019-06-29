@@ -12,8 +12,7 @@ Imports:
     digest (>= 0.6.8),
     DT, 
     shiny (>= 0.13.2.9003),
-    shinyjs (>= 0.5.2),
-    rstudio/shiny
+    shinyjs (>= 0.5.2)
 Suggests:
     knitr (>= 1.7),
     rmarkdown,
