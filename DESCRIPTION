@@ -15,9 +15,9 @@ Imports:
     shinyjs (>= 0.5.2)
 Suggests:
     knitr (>= 1.7),
-    rmarkdown
-Remotes:  rstudio/shiny
+    rmarkdown,
+    testthat
 License: MIT + file LICENSE
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.1
