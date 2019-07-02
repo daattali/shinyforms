@@ -168,6 +168,55 @@ shinyApp(ui = ui, server = server)
 
 Notice how easy this is? After defining the forms with R lists, it's literally two function calls for each form to get it set up. A couple things to note: first, the soccer form uses the `multiple = FALSE` option, which means a user can only submit once (if you restart the Shiny app, the same user is able to submit the form again). Secondly, the first form uses the `password` option, which means that the admin table will be available IF you add `?admin=1` to the URL. To see the responses from the admin table, click on "Show responses" and type in the password "shinyforms". This app also uses several other features.
 
+
+
+#### Using Google Sheets example
+
+This example is similar to the first example, but illustrates how to use shinyforms with Google sheets as your storage type. In the example you can see that we need to first create a new Google sheet document and give it a header. From there on, we only need to pass the sheet's key to the storage list and shinyforms will do the rest.
+
+```
+library(shiny)
+library(shinyforms)
+library(googlesheets)
+
+# Create a new google sheets file 
+df <- data.frame(name = "", age = 0, favourite_pkg = "", terms = TRUE)
+google_df <- gs_new("responses", input = df, trim = TRUE, verbose = FALSE)
+
+
+questions <- list(
+  list(id = "name", type = "text", title = "Name", mandatory = TRUE),
+  list(id = "age", type = "numeric", title = "Age"),
+  list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
+  list(id = "terms", type = "checkbox", title = "I agree to the terms")
+)
+
+formInfo <- list(
+  id = "basicinfo",
+  questions = questions,
+  storage = list(
+    # Right now, only flat file storage is supported
+    type = STORAGE_TYPES$GOOGLE_SHEETS,
+    # The path where responses are stored
+    path = "responses",
+    # Get the Google sheet key 
+    key = google_df$sheet_key
+    
+  )
+)
+
+ui <- fluidPage(
+  formUI(formInfo)
+)
+
+server <- function(input, output, session) {
+  formServer(formInfo)
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+
 #### Feedback
 
 If you think you could have a use for `shinyforms`, please do [let me know](http://deanattali.com/aboutme/#contact) or [file an issue](https://github.com/daattali/shinyforms/issues). Don't be shy!
