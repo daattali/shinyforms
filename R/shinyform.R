@@ -84,16 +84,23 @@ loadData <- function(storage) {
 # Takes data from your shinyforms inputs and saves it to a flat file. 
 # Writes form inputs to a storage type and names it using a timestamp.
 # @param data Dataframe taken from input shiny object
-# @param storage A list with variable type defining users perferred type of storage and storage path
+# @param storage A list with variable type defining users perferred type of storage, filename and storage path
 saveDataFlatfile <- function(data, storage) {
-  fileName <- paste0(
-    paste(
-      format(Sys.time(), "%Y%m%d-%H%M%OS"),
-      digest::digest(data, algo = "md5"),
-      sep = "_"
-    ),
-    ".csv"
-  )
+  if(!is.null(formInfo$storage$filename)){
+    fileName <- paste0(
+      formInfo$storage$filename,
+      ".csv"
+    )
+  }else{
+    fileName <- paste0(
+      paste(
+        format(Sys.time(), "%Y%m%d-%H%M%OS"),
+        digest::digest(data, algo = "md5"),
+        sep = "_"
+      ),
+      ".csv"
+    )
+  }
   
   resultsDir <- storage$path
   
