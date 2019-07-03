@@ -86,12 +86,12 @@ loadData <- function(storage) {
 # @param data Dataframe taken from input shiny object
 # @param storage A list with variable type defining users perferred type of storage, filename and storage path
 saveDataFlatfile <- function(data, storage) {
-  if(!is.null(formInfo$storage$filename)){
+  if (!is.null(storage$filename)) {
     fileName <- paste0(
-      formInfo$storage$filename,
+      storage$filename,
       ".csv"
     )
-  }else{
+  } else {
     fileName <- paste0(
       paste(
         format(Sys.time(), "%Y%m%d-%H%M%OS"),
