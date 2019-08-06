@@ -84,22 +84,18 @@ loadData <- function(storage) {
 # @param data Dataframe taken from input shiny object
 # @param storage A list with variable type defining users perferred type of storage, filename and storage path
 saveDataFlatfile <- function(data, storage) {
-  if (!is.null(storage$filename)) {
-    fileName <- paste0(
-      storage$filename,
-      ".csv"
-    )
-  } else {
-    fileName <- paste0(
-      paste(
+  
+  if (is.null(storage$filename) {
+    fileName <- paste(
         format(Sys.time(), "%Y%m%d-%H%M%OS"),
         digest::digest(data, algo = "md5"),
         sep = "_"
-      ),
-      ".csv"
     )
+  } else {
+    filename <- storage$filename
   }
   
+  filename <- paste0(filename, ".csv")
   resultsDir <- storage$path
   
   # write out the results
