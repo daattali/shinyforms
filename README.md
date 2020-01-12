@@ -1,7 +1,6 @@
 # shinyforms - Easily create questionnaire-type forms with Shiny 
 
 [![Donate](http://i.imgur.com/vCIGFrH.png)](https://www.paypal.me/daattali)
-[![saythanks](http://i.imgur.com/L88apDa.png)](https://saythanks.io/to/daattali)
 
 > *Copyright 2016 [Dean Attali](http://deanattali.com). Licensed under the MIT license.*
 
