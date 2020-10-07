@@ -121,7 +121,7 @@ loadDataFlatfile <- function(storage) {
 # @param data Dataframe taken from input shiny object
 # @param storage A list with variable type defining users perferred type of storage and storage key
 saveDataGsheets <- function(data, storage) {
-  gs_add_row(gs_key(storage$key), input = data)
+  gs4_add_row(gs4_key(storage$key), input = data)
 }
 
 
@@ -129,7 +129,7 @@ saveDataGsheets <- function(data, storage) {
 # Takes data from a google doc file and passes it to your shiny app.
 # @param storage A list with variable type defining users perferred type of storage and storage key
 loadDataGsheets <- function() {
-  gs_read_csv(gs_key(storage$key))
+  gs4_read_csv(gs4_key(storage$key))
 }
 
 
