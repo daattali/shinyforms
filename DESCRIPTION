@@ -17,7 +17,8 @@ Imports:
     googledrive, 
     googlesheets4,
     gmailr,
-    magrittr
+    magrittr,
+    scales
 Suggests:
     knitr (>= 1.7),
     rmarkdown,
