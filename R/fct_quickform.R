@@ -5,7 +5,7 @@
 #'  Currently only stores data in Google Drive (or locally) and has the option to allow survey participants to return and edit their survey with a unique ID.
 #'  The IDs can also be emailed to the user. 
 #'  Requires one-time interactive setup of {googledrive}, {googlesheets4}, and {gmailr} (if applicable). 
-#'  This function has little flexibility, but offers quick and easy setup that reduces the time needed between developing and deploying a survey. 
+#'  This function has little flexibility, but offers quick and easy setup that reduces the time needed between developing and deploying a survey. Live demo: https://brentscott93.shinyapps.io/quickform/
 #' @param title a character string.
 #' @param description a character string.
 #' @param questions a nested list of questions. Must contain 'id', 'type', 'question', and optionally 'choices' in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
