@@ -1,24 +1,25 @@
 
-#' Quickly create a Google Form look-a-like shiny app
+#' Quickly create a Google Form look-a-like Shiny app
 #'
 #' @description Create a shiny app with minimal code that mimicks the look of a Google Form. 
-#'  Currently only stores data in Google Drive (or locally) and has the option to allow survey participants to return and edit their survey with a unique ID (returningUser = T).
-#'  Optionally, this ID can be emailed to the user. 
+#'  Currently only stores data in Google Drive (or locally) and has the option to allow survey participants to return and edit their survey with a unique ID.
+#'  The IDs can also be emailed to the user. 
 #'  Requires one-time interactive setup of {googledrive}, {googlesheets4}, and {gmailr} (if applicable). 
-#'  This function has little flexibility, but offers quick and easy setup that reduces the time needed between developing and deploying. 
+#'  This function has little flexibility, but offers quick and easy setup that reduces the time needed between developing and deploying a survey. 
 #' @param title a character string.
 #' @param description a character string.
-#' @param questions a nested list of questions.
-#' @param gmail FALSE or your gmail account to store data in drive and optionally to email IDs to users. 
-#' Eash response is saved as an individual Google Sheet and is saved in the folder specifiec in the folder arg. 
+#' @param questions a nested list of questions. Must contain 'id', 'type', 'question', and optionally 'choices' in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
+#' "numeric", "checkbox", "multiplechoice", "dropdown", "paragraph", "shortanswer", "height", or "race". See example.
+#' @param gmail either FALSE to save data locally or your gmail account to store data in drive and optionally to email IDs to users. 
+#' Each response is saved as an individual Google Sheet and is saved in the folder specified in the folder arg. 
 #' Google Drive/Sheets authorization is cached in the shiny app directory in '.secrets'. Make sure to upload this file when deploying to a server (like shinyapps.io). 
 #' @param folder a character string specifying the folder on desktop/drive to store results in.
-#' @param returningUser logical. Do you want users to be able to return and edit/update their survey. Default is FALSE
-#' @param emailId logical. Only necessary if `returningUser=T`. Do you want to email ID to users. Default is FALSE. If TRUE, need to setup gmail credentials and move the json file into shiny app directory as 'credentials.json'
-#' @param subject a character string. For the subject of your emaill. Default is 'Your survey ID'. Only used is `emailId=T`
-#' @param color a character string of a hex color to theme the app. Default is blue ('#2e77ff').
+#' @param returningUser logical. Do you want provide users a ID# in order to return and edit/update their survey? Default is FALSE.
+#' @param emailId logical.  Do you want to email ID to users?  Only implemented if `returningUser=T` and valid email is given to `gamil` argument. Default is FALSE. If TRUE, need to setup gmail credentials and move the json file into shiny app directory as 'credentials.json'.
+#' @param subject a character string. For the subject of your email. Default is 'Your survey ID'. Only used if `emailId=T`.
+#' @param color a character string specifying a hex color or to theme the app. Default is blue ('#2e77ff'). Header of title box and submit button are the actual color and background is made semi-transparent `with scales::alpha(color, 0.5)`.
 #'
-#' @return a shiny app
+#' @return A Shiny App
 #' @export
 #' @import shiny shinydashboard magrittr
 #' @examples
@@ -30,42 +31,29 @@
 #' questions = list(
 #'   list(id = "age",
 #'        type = "numeric",
-#'        title = "Age (yrs)",
+#'        question = "Age (yrs)",
 #'        required = T),
 #'   list(id = "height",
 #'        type = "height",
-#'        title = "Height (ft-in)",
-#'        required = T),
-#'   list(id = "weight_lbs",
-#'        type = "numeric",
-#'        title = "Weight (lbs)",
+#'        question = "Height (ft-in)",
 #'        required = T),
 #'   list(id = 'ethnicity',
 #'        type = "multiplechoice",
-#'        title = "Are you of Hispanic, Latino, or of Spanish origin?" ,
+#'        question = "Are you of Hispanic, Latino, or of Spanish origin?" ,
 #'        choices = list('No', 'Yes'),
 #'        required = T),
 #'   list(id = "race",
-#'        type = "multiplechoice",
-#'        title = "Race",
-#'        choices = list('American Indian or Alaska Native',
-#'                       'Asian',
-#'                       'Black or African American',
-#'                       'Native Hawaiian or Other Pacific Islander',
-#'                       'White',
-#'                       'Other'),
+#'        type = "race",
+#'        question = "Race",
 #'         required = T),
-#'   list(id = "bp_systolic",
-#'        type = "numeric",
-#'        title = "Blood Pressure (Systolic)"),
-#'   list(id = "bp_diastolic",
-#'        type = "numeric",
-#'        title = "Blood Pressure (Diastolic)"),
-#'   list(id = "resting_HR",
-#'        type = "numeric",
-#'        title = "Resting Heart Rate")
+#'   list(id = 'shortanswer',
+#'        type = 'shortanswer',
+#'        question = 'One word to describe this app',
+#'        required = T),
+#'   list(id = 'user_opinion',
+#'        type = 'paragraph',
+#'        question= 'Please provide any feedback')
 #' ),
-#'
 #' gmail = F,
 #' folder = 'shinyforms'
 #' )
@@ -80,18 +68,28 @@ quickform <- function(title = NULL,
                       subject = 'Your survey ID',
                       color = '#2e77ff'){
   
-  
   options(scipen=999)
-  quickformCSS <- "shinyforms-ui .mandatory_star { color: #db4437; font-size: 20px; line-height: 0; }"
+  bgColor <- scales::alpha(color, 0.5)
+  quickformCSS <- paste0("shinyforms-ui .mandatory_star { color: #db4437; font-size: 20px; line-height: 0; }
+                         .box.box-primary { border-top-color:", color, ";}
+                         body {background-color:", bgColor, ";}
+                         .content-wrapper, .right-side {background-color:", bgColor, ";}
+                         .skin-blue .left-side, .skin-blue .main-sidebar, .skin-blue .wrapper {
+                         background-color: #fff;}")
   
   #setup storage locations and authentications to google services
-  if(gmail != FALSE){
+  if(gmail == FALSE){
+    dir.create(folder, showWarnings = F)
+  } else {
     if(grepl('@', gmail)){
       googledrive::drive_auth(email = gmail, cache = '.secrets')
       googlesheets4::gs4_auth(token = googledrive::drive_token())
       # Create new sheets folder for responses
       #if folder does not exist create it
-      if(nrow(googledrive::drive_find(folder, n_max = 1)) == 0){
+      find_folder <- googledrive::drive_find(folder, n_max = 1)
+      find_folder <- find_folder[find_folder$name == folder,]
+      
+      if(nrow(find_folder) == 0){
         googledrive::drive_mkdir(folder)
       }
     } else {
@@ -103,7 +101,7 @@ quickform <- function(title = NULL,
   if(returningUser){
     if(emailId){
       json_file <- list.files(pattern = 'credentials.json')
-        if(identical(json_exists, character(0))){
+        if(identical(json_file, character(0))){
           stop('You have selected to use your gmail to send emails, but there are no credentials in your app directory.')
         }
       # Configure your app
@@ -119,8 +117,7 @@ quickform <- function(title = NULL,
           dashboardHeader(disable = T),
           dashboardSidebar(disable = T),
           dashboardBody(
-            fresh::use_theme(quickformTheme(color)),
-            style = paste0("background-color:", scales::alpha(color, 0.5), ";"),
+            #style = paste0("background-color:", bgColor, ";"),
             shinyjs::useShinyjs(),
             shinyjs::inlineCSS(quickformCSS),
               fluidRow(
@@ -134,7 +131,7 @@ quickform <- function(title = NULL,
                   lapply(questions, formQ),
                   actionButton('submit',
                                'Submit',
-                                style = paste0("background-color: ", color, "; color: #fff;"))
+                                style = paste0("background-color: ", color, "; color:#fff;"))
                     ) # column close
                   ) # row close
                 ) # dashboard body close
@@ -149,76 +146,75 @@ quickform <- function(title = NULL,
         if(input$user == 'return'){
           if(input$userId == '') showNotification('Please enter ID if you are a returning user.')
           req(input$userId)
-          if(nchar(input$userId) != 20) showNotification('Not a valid ID.', type = 'error')
-          req(nchar(input$userId) == 20)
+          if(nchar(input$userId) != 21) showNotification('Not a valid ID. Must be 21 characters', type = 'error')
+          req(nchar(input$userId) == 21)
         }
       }
       
      #check to see if any required values are NULL - if so stop reactivity and show error informing user to answer all required
-      lapply(questions, checkRequired)
+      lapply(questions, checkRequired, input = input)
       
       withProgress(message = 'Saving', {
         setProgress(0.2)
         #probably a better way to do this
         #removing uneeded rows from the results that prevent from converting list to data.frame
-        l <- reactiveValuesToList(input)
-        l$submit <- NULL
-        l$sidebarCollapsed <- NULL
-        l$sidebarItemExpanded <- NULL
-        l$userId <- NULL
+        responses <- lapply(questions, saveResponse, input = input)
         setProgress(0.35)
-        
-        if(returningUser) l$loadReturning <- NULL
-        
-        data <- as.data.frame(l)
+        data <- do.call('cbind', responses)
+        filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(runif(1, 1000000, 2000000)))
         setProgress(0.5)
+        
         if(returningUser){
           if(input$user == 'new'){
-            filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(runif(1, 1000000, 2000000)))
             rv$filename <- filename
             data$id <- filename
-            if(gmail != FALSE){
-              #create new sheet and then move to desired location
-              #googlesheets doesn't seem to support making sheets in desired locations
-              googlesheets4::gs4_create(name = filename, sheets = data)
-              setProgress(0.75, detail = 'Uploading results to google drive')
-              googledrive::drive_mv(filename, path = file.path(folder, filename))
+            if(gmail == FALSE){
+              utils::write.csv(data,
+                               file.path(folder, paste0(filename, '.csv.')),
+                               row.names = F)
             } else {
-              #if local write to disk
-              write.csv(data, file.path(folder, paste0(filename, '.csv.')))
+              saveToDrive(data = data, filename = rv$filename, folder = folder)
             }
-            
             setProgress(1)
-            
           } else if(input$user == 'return'){
-            #if valid ID and googledrive storage overwrite sheets data
-              if(gmail != FALSE){
-                
-                setProgress(0.75, detail = 'Uploading results to google drive')
+             #if is returning user and local storage write to disk
+            rv$filename <- input$userId
+              if(gmail == FALSE){
+                utils::write.csv(data,
+                                 file = file.path(folder, paste0(input$userId, '.csv')),
+                                 row.names = F)
+                setProgress(1)
+              } else {
                 userDataOverwrite <- googledrive::drive_find(input$userId, n_max = 1)
                 #check to make sure user supplied ID matches a file on drive
                 if(nrow(userDataOverwrite) == 0){
                   showNotification('Not a valid ID', type = 'error')
-                } else {
+                 } else {
                   #if ID matches a file overwrite with new survey data
                   data$id <- input$userId
-                  rv$filename <- input$userId
                   googlesheets4::write_sheet(data, ss = userDataOverwrite, sheet = 'data')
                 }
-              } else {
-                #if local overwrite on disk
-                write.csv(data, file = file.path(folder, paste0(input$userId, '.csv')))
-              }
               setProgress(1)
-          }
-        }
-      })
+             } 
+          } 
+        } else { #if non returningUser
+          if(gmail == FALSE){
+            utils::write.csv(data, 
+                             file = file.path(folder, paste0(filename, '.csv')),
+                             row.names = F)
+            setProgress(1)
+          } else {
+            saveToDrive(data = data, filename = filename, folder = folder)
+            setProgress(1)
+         }
+      }
+    })
       #once complete -  update a reactive value to launch a modal
       rv$saved <- rv$saved + 1
     })
     
     output$showId <- renderPrint({
-      cat(isolate(rv$filename))
+      cat(rv$filename)
     })
     
     observeEvent(rv$saved, ignoreInit = T, {
@@ -263,10 +259,10 @@ quickform <- function(title = NULL,
           gmailr::gm_send_message(email)
           shiny::showNotification('Email sent!', type = 'message')
           removeModal()
-          
-        } else {
-          showNotification('Not a valid email address', type = 'error')
-        }
+            
+          } else {
+             showNotification('Not a valid email address', type = 'error')
+            }
         
       } else {
         #if emailId is False both Ok and cancel remove the modal
@@ -278,7 +274,7 @@ quickform <- function(title = NULL,
     #makes the returning user UI box
     output$returningUser <- renderUI({
       if(returningUser){
-        shinydashboard::box(width = NULL,
+        box(width = NULL,
             solidHeader = T,
             title = 'Returning User?',
             radioButtons('user',
@@ -356,8 +352,11 @@ quickform <- function(title = NULL,
                                   inputId =  questions[[i]]$id,
                                   selected =  data[[questions[[i]]$id]])
                 
+              } else if (questions[[i]]$type == 'race'){
+                updateRadioButtons(session = session,
+                                   inputId =  questions[[i]]$id,
+                                   selected =  data[[questions[[i]]$id]])
               }
-              
             }
           })
           showNotification('Survey Loaded', type = 'message')

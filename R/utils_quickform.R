@@ -5,6 +5,7 @@
 #' @noRd
 formQ <- function(question){
 
+  if(is.null(question$id)) stop('Every question needs an Id')
   #decide what widget to make
   #all the shiny widgets have been renamed with wrappers to mimic the google form options
   #built off of shinyforms
@@ -22,6 +23,15 @@ formQ <- function(question){
     input <- paragraph(question$id)
   } else if (question$type == 'height'){
     input <- selectHeight(question$id)
+  } else if (question$type == 'race'){
+    input <- multipleChoice(question$id, c('American Indian or Alaska Native',
+                                           'Asian',
+                                            'Black or African American',
+                                            'Native Hawaiian or Other Pacific Islander',
+                                            'White',
+                                            'Other'))
+  } else {
+    stop('Not a valid question type')
   }
 
   #if questions is marked as required add a 'Required *' tag before widget
@@ -35,11 +45,12 @@ formQ <- function(question){
     ui <- input
   }
 
+  if(is.null(question$question)) stop('Every question needs to ask a question or give a propmt with `question=` in the list')
   #put everything in a dashboard box to make it look like a Google Form
   #one widget to a box
   shinydashboard::box(width = NULL,
                       solidHeader = T,
-                      title = question$title,
+                      title = question$question,
                       ui)
 
 
@@ -55,17 +66,6 @@ multipleChoice <- function(id, choices){
                       choices = choices,
                       inline = F)
 }
-
-#' Limited theme option to change color of form
-#' @param color a character string of a hex color code
-#' @noRd
-quickformTheme <- function(color){
-  fresh::create_theme(
-    fresh::adminlte_color(
-      light_blue = color)
-  )
-}
-
 
 
 #' Convenient wrappers for shiny widgets using the googleForm lingo
@@ -142,7 +142,24 @@ checkRequired <- function(question, input){
     if(question$required){
       if(is.null(input[[question$id]])) showNotification('Please answer all required questions', type = 'error')
       req(!is.null(input[[question$id]]))
+      if(nchar(input[[question$id]]) == 0) showNotification('Please answer all required questions', type = 'error')
+      req(nchar(input[[question$id]]) != 0)
     }
   }
-      
+}
+
+#' Save data to google drive
+#' @noRd
+saveToDrive <- function(data, filename, folder){
+  googlesheets4::gs4_create(name = filename, sheets = data)
+  setProgress(0.75, detail = 'Uploading results to google drive')
+  googledrive::drive_mv(filename, path = file.path(folder, filename))
+}
+
+#' Save reactive values
+#' @noRd
+saveResponse <- function(question, input){
+  x <- data.frame(value = input[[question$id]])
+  names(x) <- question$id
+  x
 }
