@@ -158,8 +158,15 @@ saveToDrive <- function(data, filename, folder){
 
 #' Save reactive values
 #' @noRd
-saveResponse <- function(question, input){
+getUserInput <- function(question, input){
   x <- data.frame(value = input[[question$id]])
   names(x) <- question$id
   x
+}
+
+
+#' Check that questions are a list
+#' @noRd
+checkQuestionIsList <- function(question){
+  if(!is.list(question)) stop('Every element in "questions" must be a list.')
 }

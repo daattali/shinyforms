@@ -1,23 +1,32 @@
-
 #' Quickly create a Google Form look-a-like Shiny app
 #'
 #' @description Create a shiny app with minimal code that mimicks the look of a Google Form. 
-#'  Currently only stores data in Google Drive (or locally) and has the option to allow survey participants to return and edit their survey with a unique ID.
-#'  The IDs can also be emailed to the user. 
-#'  Requires one-time interactive setup of {googledrive}, {googlesheets4}, and {gmailr} (if applicable). 
-#'  This function has little flexibility, but offers quick and easy setup that reduces the time needed between developing and deploying a survey. Live demo: https://brentscott93.shinyapps.io/quickform/
-#' @param title a character string.
-#' @param description a character string.
-#' @param questions a nested list of questions. Must contain 'id', 'type', 'question', and optionally 'choices' in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
+#'  Currently only stores data in Google Drive (or locally) and has the option to allow survey participants to return and edit their survey by providing a unique ID.
+#'  The IDs can also be emailed to the user (see "emailId").
+#'  Use of remote storage with Google Drive or emailing IDs requires one-time interactive setup of {googledrive}, {googlesheets4}, and {gmailr} (if applicable). 
+#'  This function has little flexibility/customize-ability, but offers quick and easy setup that reduces the time needed between developing and deploying a survey.
+#'  \href{https://brentscott93.shinyapps.io/quickform/}{Live Demo}
+#'  
+#'  This is basically a wrapper around the usual shinyApp(ui, server) workflow that exists in an app.R file so there is no need to write any Shiny code or even explicitly call library(shiny). 
+#'  quickform() will handle all of that.. 
+#'  As a result, a quickform() app can only exist as a standalone app.R file.
+#'  
+#' @param title a character string. Title of the form/survey.
+#' @param description a character string. A description providing more information about the form/survey.
+#' @param questions a nested list of questions. Must contain 'id', 'type', 'question', and 'choices' (depending on the type of input) in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
 #' "numeric", "checkbox", "multiplechoice", "dropdown", "paragraph", "shortanswer", "height", or "race". See example.
-#' @param gmail either FALSE to save data locally or your gmail account to store data in drive and optionally to email IDs to users. 
-#' Each response is saved as an individual Google Sheet and is saved in the folder specified in the folder arg. 
-#' Google Drive/Sheets authorization is cached in the shiny app directory in '.secrets'. Make sure to upload this file when deploying to a server (like shinyapps.io). 
-#' @param folder a character string specifying the folder on desktop/drive to store results in.
+#' @param gmail either FALSE to save data locally or your gmail account to store data in Google Drive and optionally to email IDs to users. 
+#' Each response is saved as an individual Google Sheet and is saved in the folder specified in the 'folder' argument. 
+#' Google Drive/Sheets authorization is cached in the shiny app directory in '.secrets'. Make sure to upload this file when deploying to a server (like shinyapps.io).
+#'  Similarily, gmailr authorization is stored in '.gm-secrets'.
+#' @param folder a character string specifying the folder on desktop/Google Drive to store results in.
 #' @param returningUser logical. Do you want provide users a ID# in order to return and edit/update their survey? Default is FALSE.
-#' @param emailId logical.  Do you want to email ID to users?  Only implemented if `returningUser=T` and valid email is given to `gamil` argument. Default is FALSE. If TRUE, need to setup gmail credentials and move the json file into shiny app directory as 'credentials.json'.
-#' @param subject a character string. For the subject of your email. Default is 'Your survey ID'. Only used if `emailId=T`.
-#' @param color a character string specifying a hex color or to theme the app. Default is blue ('#2e77ff'). Header of title box and submit button are the actual color and background is made semi-transparent `with scales::alpha(color, 0.5)`.
+#' @param emailId logical.  Do you want to email ID to users?  Only implemented if "returningUser=T" and valid email is given to "gmail" argument.
+#'  Default is FALSE.
+#'   If TRUE, need to setup gmail credentials and move the json file into shiny app directory as 'credentials.json'.
+#'  \href{https://github.com/r-lib/gmailr}{More info on gmailr package and setup}. 
+#' @param subject a character string. For the subject of your email. Default is 'Your survey ID'. Only used if "emailId=T".
+#' @param color a character string specifying a hex color or to theme the app. Default is blue ("#2e77ff"). Header of title box and submit button are the actual color and background is made semi-transparent `with scales::alpha(color, 0.5)`.
 #'
 #' @return A Shiny App
 #' @export
@@ -68,6 +77,13 @@ quickform <- function(title = NULL,
                       subject = 'Your survey ID',
                       color = '#2e77ff'){
   
+  if(!is.character(title)) stop("The 'title' argument must be a character string.")
+  if(!is.character(description)) stop("The 'description' argument must be a character string.")
+  if(!is.list(questions)) stop("The 'questions' argument must contain a list.")
+  lapply(questions, checkQuestionIsList)
+  if(!is.logical(returningUser)) stop("'returningUser' must be TRUE/FALSE")
+  if(!is.logical(emailId)) stop("'emailId' must be TRUE/FALSE")
+  
   options(scipen=999)
   bgColor <- scales::alpha(color, 0.5)
   quickformCSS <- paste0("shinyforms-ui .mandatory_star { color: #db4437; font-size: 20px; line-height: 0; }
@@ -117,6 +133,7 @@ quickform <- function(title = NULL,
           dashboardHeader(disable = T),
           dashboardSidebar(disable = T),
           dashboardBody(
+            id = 'dashboardBody',
             #style = paste0("background-color:", bgColor, ";"),
             shinyjs::useShinyjs(),
             shinyjs::inlineCSS(quickformCSS),
@@ -158,7 +175,7 @@ quickform <- function(title = NULL,
         setProgress(0.2)
         #probably a better way to do this
         #removing uneeded rows from the results that prevent from converting list to data.frame
-        responses <- lapply(questions, saveResponse, input = input)
+        responses <- lapply(questions, getUserInput, input = input)
         setProgress(0.35)
         data <- do.call('cbind', responses)
         filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(runif(1, 1000000, 2000000)))
@@ -207,10 +224,12 @@ quickform <- function(title = NULL,
             saveToDrive(data = data, filename = filename, folder = folder)
             setProgress(1)
          }
-      }
+        }
     })
       #once complete -  update a reactive value to launch a modal
       rv$saved <- rv$saved + 1
+      
+      shinyjs::reset('dashboardBody')
     })
     
     output$showId <- renderPrint({
