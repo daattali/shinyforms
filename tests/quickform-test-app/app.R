@@ -1,3 +1,6 @@
 library(shinyforms)
-quickform(questions = list(list(id = 'race', type = 'race')), folder = 'test-output')
+quickform(title = '',
+          description = '',
+          questions = list(list(id = 'race', type = 'race', question = 'Race')),
+          folder = 'test-output')
                            

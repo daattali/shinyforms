@@ -1,3 +1,4 @@
 library(shinytest)
-shinytest::testApp("../")
+shinytest::testApp("./tests/quickform-test-app")
+
 
