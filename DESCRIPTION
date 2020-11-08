@@ -1,5 +1,5 @@
 Package: shinyforms
-Title: Description
+Title: Shiny extension for creating forms and surveys.
 Version: 0.0.0.9000
 Authors@R: person("Dean", "Attali", email = "daattali@gmail.com",
     role = c("aut", "cre"))

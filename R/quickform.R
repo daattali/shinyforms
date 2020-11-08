@@ -178,7 +178,7 @@ quickform <- function(title = NULL,
         responses <- lapply(questions, getUserInput, input = input)
         setProgress(0.35)
         data <- do.call('cbind', responses)
-        filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(runif(1, 1000000, 2000000)))
+        filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(stats::runif(1, 1000000, 2000000)))
         setProgress(0.5)
         
         if(returningUser){
@@ -329,7 +329,7 @@ quickform <- function(title = NULL,
               userFile <- list.files(folder, pattern = input$userId, full.names = T)
               if(identical(userFile, character(0))) showNotification('No file matches that ID', type = 'error')
               req(!identical(userFile, character(0)))
-              data <- read.csv(userFile)
+              data <- utils::read.csv(userFile)
             }
             #loop through every questions list element
             #update the shiny widget with the saved value in the google sheet

@@ -12,7 +12,7 @@ formQ <- function(question){
   if (question$type == "numeric") {
     input <- shiny::numericInput(question$id, NULL, 0)
   } else if (question$type == "checkbox") {
-    input <- shiny::checkbox(question$id, question$choices)
+    input <- shiny::checkboxInput(question$id, question$choices)
   } else if (question$type == 'multiplechoice'){
     input <- multipleChoice(question$id, question$choices)
   } else if (question$type == 'dropdown'){

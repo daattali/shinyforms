@@ -18,15 +18,17 @@ test_that("quickform() errors when char. string not supplied to 'description' ar
 })
 
 test_that("quickform() errors with invalid email", {
-  expect_error(quickform(questions = list(list(id = 'id', type = 'numeric')), gmail = 'email'), 'Not a valid')
+  expect_error(quickform(questions = list(list(id = 'id', type = 'numeric')), gmail = 'email'), 'character')
 })
 
 test_that("quickform() errors when questions is not a list", {
-  expect_error(quickform(questions = 'string'), 'must contain a list')
+  expect_error(quickform(questions = 'string', title = '', description = ''), 'must contain a list')
 })
 
 test_that("quickform() errors when questions element is not a list", {
-  expect_error(quickform(questions = list(
+  expect_error(quickform(title = '', 
+                         description = '',
+                         questions = list(
                                        list(id = 'id', type = 'numeric'),
                                        'string')),
                'must be a list')
