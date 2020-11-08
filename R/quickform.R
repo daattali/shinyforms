@@ -102,7 +102,7 @@ quickform <- function(title = NULL,
       googlesheets4::gs4_auth(token = googledrive::drive_token())
       # Create new sheets folder for responses
       #if folder does not exist create it
-      find_folder <- googledrive::drive_find(folder, n_max = 1)
+      find_folder <- googledrive::drive_find(folder, n_max = 10)
       find_folder <- find_folder[find_folder$name == folder,]
       
       if(nrow(find_folder) == 0){
