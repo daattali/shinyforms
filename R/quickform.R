@@ -76,7 +76,6 @@ quickform <- function(title = NULL,
   if(!is.logical(returningUser)) stop("'returningUser' must be TRUE/FALSE")
   if(!is.logical(emailId)) stop("'emailId' must be TRUE/FALSE")
   
-  options(scipen=999)
   bgColor <- scales::alpha(color, 0.5)
   quickformCSS <- paste0("shinyforms-ui .mandatory_star { color: #db4437; font-size: 20px; line-height: 0; }
                          .box.box-primary { border-top-color:", color, ";}

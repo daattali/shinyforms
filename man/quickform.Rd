@@ -22,7 +22,7 @@ quickform(
 \item{description}{a character string. A description providing more information about the form/survey.}
 
 \item{questions}{a nested list of questions. Must contain 'id', 'type', 'question', and 'choices' (depending on the type of input) in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
-"numeric", "checkbox", "multiplechoice", "dropdown", "paragraph", "shortanswer", "height", or "race". See example.}
+"numeric", "checkbox", "multiplechoice", "dropdown", "paragraph", "shortanswer".  See example.}
 
 \item{gmail}{either FALSE to save data locally or your gmail account to store data in Google Drive and optionally to email IDs to users. 
 Each response is saved as an individual Google Sheet and is saved in the folder specified in the 'folder' argument. 
@@ -68,19 +68,11 @@ questions = list(
        type = "numeric",
        question = "Age (yrs)",
        required = T),
-  list(id = "height",
-       type = "height",
-       question = "Height (ft-in)",
-       required = T),
   list(id = 'ethnicity',
        type = "multiplechoice",
        question = "Are you of Hispanic, Latino, or of Spanish origin?" ,
        choices = list('No', 'Yes'),
        required = T),
-  list(id = "race",
-       type = "race",
-       question = "Race",
-        required = T),
   list(id = 'shortanswer',
        type = 'shortanswer',
        question = 'One word to describe this app',
