@@ -97,7 +97,7 @@ quickform <- function(title = NULL,
       # Create new sheets folder for responses
       #if folder does not exist create it
       find_folder <- googledrive::drive_find(folder, n_max = 10)
-      find_folder <- find_folder[find_folder$name == folder,]
+      find_folder <- find_folder[find_folder[["name"]] == folder,]
       
       if(nrow(find_folder) == 0){
         googledrive::drive_mkdir(folder)
@@ -151,14 +151,14 @@ quickform <- function(title = NULL,
   server <- function(input, output, session) {
     
     rv <- reactiveValues(saved = 0)
-    observeEvent(input$submit, {
+    observeEvent(input[["submit"]], {
       #check if returning user has entered a valid ID (or at least entered something really)
       if(returningUser){
-        if(input$user == 'return'){
-          if(input$userId == '') showNotification('Please enter ID if you are a returning user.')
-          req(input$userId)
-          if(nchar(input$userId) != 21) showNotification('Not a valid ID. Must be 21 characters', type = 'error')
-          req(nchar(input$userId) == 21)
+        if(input[["user"]] == 'return'){
+          if(input[["userId"]] == '') showNotification('Please enter ID if you are a returning user.')
+          req(input[["userId"]])
+          if(nchar(input[["userId"]]) != 21) showNotification('Not a valid ID. Must be 21 characters', type = 'error')
+          req(nchar(input[["userId"]]) == 21)
         }
       }
       
@@ -176,33 +176,33 @@ quickform <- function(title = NULL,
         setProgress(0.5)
         
         if(returningUser){
-          if(input$user == 'new'){
-            rv$filename <- filename
-            data$id <- filename
+          if(input[["user"]] == 'new'){
+            rv[["filename"]] <- filename
+            data[["id"]] <- filename
             if(gmail == FALSE){
               utils::write.csv(data,
                                file.path(folder, paste0(filename, '.csv.')),
                                row.names = FALSE)
             } else {
-              saveToDrive(data = data, filename = rv$filename, folder = folder)
+              saveToDrive(data = data, filename = filename, folder = folder)
             }
             setProgress(1)
-          } else if(input$user == 'return'){
+          } else if(input[["user"]] == "return"){
              #if is returning user and local storage write to disk
-            rv$filename <- input$userId
+            rv[["filename"]] <- input[["userId"]]
               if(gmail == FALSE){
                 utils::write.csv(data,
-                                 file = file.path(folder, paste0(input$userId, '.csv')),
+                                 file = file.path(folder, paste0(input[["userId"]], '.csv')),
                                  row.names = FALSE)
                 setProgress(1)
               } else {
-                userDataOverwrite <- googledrive::drive_find(input$userId, n_max = 1)
+                userDataOverwrite <- googledrive::drive_find(input[["userId"]], n_max = 1)
                 #check to make sure user supplied ID matches a file on drive
                 if(nrow(userDataOverwrite) == 0){
                   showNotification('Not a valid ID', type = 'error')
                  } else {
                   #if ID matches a file overwrite with new survey data
-                  data$id <- input$userId
+                  data[["id"]] <- input[["userId"]]
                   googlesheets4::write_sheet(data, ss = userDataOverwrite, sheet = 'data')
                 }
               setProgress(1)
@@ -221,15 +221,15 @@ quickform <- function(title = NULL,
         }
     })
       #once complete -  update a reactive value to launch a modal
-      rv$saved <- rv$saved + 1
+      rv[["saved"]] <- rv[["saved"]] + 1
       shinyjs::reset('dashboardBody')
     })
     
-    output$showId <- renderPrint({
-      cat(rv$filename)
+    output[["showId"]] <- renderPrint({
+      cat(rv[["filename"]])
     })
     
-    observeEvent(rv$saved, ignoreInit = TRUE, {
+    observeEvent(rv[["saved"]], ignoreInit = TRUE, {
       if(returningUser){
         shiny::showModal(
           shiny::modalDialog(
@@ -258,15 +258,15 @@ quickform <- function(title = NULL,
       }
     })
     
-    observeEvent(input$ok, ignoreInit = TRUE, {
+    observeEvent(input[["ok"]], ignoreInit = TRUE, {
       #if ok is clicked in modal dialogue and a valid email is entered - email id to address with gmailr if emailId is T
       if(emailId){
-        if(grepl('@', input$address)){
+        if(grepl('@', input[["address"]])){
           email <- gmailr::gm_mime() %>%
-            gmailr::gm_to(input$address) %>%
+            gmailr::gm_to(input[["address"]]) %>%
             gmailr::gm_from(gmail) %>%
             gmailr::gm_subject(subject) %>%
-            gmailr::gm_text_body(paste0('Thanks for taking the survey. Your returning ID is: ' , rv$filename))
+            gmailr::gm_text_body(paste0('Thanks for taking the survey. Your returning ID is: ' , rv[["filename"]]))
           
           gmailr::gm_send_message(email)
           shiny::showNotification('Email sent!', type = 'message')
@@ -284,18 +284,18 @@ quickform <- function(title = NULL,
     
     #### Returning User ####
     #makes the returning user UI box
-    output$returningUser <- renderUI({
+    output[["returningUser"]] <- renderUI({
       if(returningUser){
         box(width = NULL,
             solidHeader = TRUE,
-            title = 'Returning User?',
-            radioButtons('user',
+            title = "Returning User?",
+            radioButtons("user",
                          label = NULL,
-                         choices = list('New User' = 'new',
-                                        'Returning' = 'return'),
+                         choices = list("New User" = "new",
+                                        "Returning" = "return"),
                          inline = TRUE),
-            shiny::textInput('userId', label = 'Enter ID', placeholder = 'Enter ID Here'),
-            shiny::actionButton('loadReturning', 'Load')
+            shiny::textInput("userId", label = "Enter ID", placeholder = "Enter ID Here"),
+            shiny::actionButton("loadReturning", "Load")
         )
       }
     })
@@ -304,58 +304,58 @@ quickform <- function(title = NULL,
     #reactive events that occur if a returning user ID is entered
     #the app will search for a matching filename to the unique ID
     #if one is found the survey is updated with those results
-    observeEvent(input$loadReturning, {
+    observeEvent(input[["loadReturning"]], {
       if(returningUser){
-        if(input$user == 'return'){
-          if(input$userId == '') shiny::showNotification('Please enter ID if you are a returning user.')
-          req(input$userId)
-          withProgress(message = 'Loading',{
+        if(input[["user"]] == "return"){
+          if(input[["userId"]] == "") shiny::showNotification("Please enter ID if you are a returning user.")
+          req(input[["userId"]])
+          withProgress(message = "Loading",{
             if(gmail != FALSE){
               #googledrive storage
-              userFile <-  googledrive::drive_find(input$userId, n_max = 1)
-              if(nrow(userFile) == 0) showNotification('No file matches that ID', type = 'error')
+              userFile <-  googledrive::drive_find(input[["userId"]], n_max = 1)
+              if(nrow(userFile) == 0) showNotification("No file matches that ID", type = "error")
               req(nrow(userFile) == 1)
               setProgress(0.5, detail = 'Updating')
               data <- googlesheets4::read_sheet(userFile)
             } else if(gmail == FALSE){
               #local file storage
-              userFile <- list.files(folder, pattern = input$userId, full.names = TRUE)
-              if(identical(userFile, character(0))) showNotification('No file matches that ID', type = 'error')
+              userFile <- list.files(folder, pattern = input[["userId"]], full.names = TRUE)
+              if(identical(userFile, character(0))) showNotification("No file matches that ID", type = "error")
               req(!identical(userFile, character(0)))
               data <- utils::read.csv(userFile)
             }
             #loop through every questions list element
             #update the shiny widget with the saved value in the google sheet
             for(i in seq_along(questions)){
-              if (questions[[i]]$type == "numeric"){
+              if (questions[[i]][["type"]] == "numeric"){
                 updateNumericInput(session = session,
-                                   inputId = questions[[i]]$id,
-                                   value =  data[[questions[[i]]$id]])
+                                   inputId = questions[[i]][["id"]],
+                                   value =  data[[questions[[i]][["id"]]]])
                 
-              } else if (questions[[i]]$type == "checkbox"){
+              } else if (questions[[i]][["type"]] == "checkbox"){
                 updateCheckboxInput(session = session,
-                                    inputId = questions[[i]]$id,
-                                    value =  data[[questions[[i]]$id]])
+                                    inputId = questions[[i]][["id"]],
+                                    value =  data[[questions[[i]][["id"]]]])
                 
-              } else if (questions[[i]]$type == 'multiplechoice'){
+              } else if (questions[[i]][["type"]] == 'multiplechoice'){
                 updateRadioButtons(session = session,
-                                   inputId =  questions[[i]]$id,
-                                   selected =  data[[questions[[i]]$id]])
+                                   inputId =  questions[[i]][["id"]],
+                                   selected =  data[[questions[[i]][["id"]]]])
                 
-              } else if (questions[[i]]$type == 'dropdown'){
+              } else if (questions[[i]][["type"]] == 'dropdown'){
                 updateSelectInput(session = session,
-                                  inputId =  questions[[i]]$id,
-                                  selected =  data[[questions[[i]]$id]])
+                                  inputId =  questions[[i]][["id"]],
+                                  selected =  data[[questions[[i]][["id"]]]])
                 
-              } else if (questions[[i]]$type == 'shortanswer'){
+              } else if (questions[[i]][["type"]] == 'shortanswer'){
                 updateTextInput(session = session,
-                                inputId =  questions[[i]]$id,
-                                value =  data[[questions[[i]]$id]])
+                                inputId =  questions[[i]][["id"]],
+                                value =  data[[questions[[i]][["id"]]]])
                 
-              } else if (questions[[i]]$type == 'paragraph'){
+              } else if (questions[[i]][["type"]] == 'paragraph'){
                 updateTextAreaInput(session = session,
-                                    inputId = questions[[i]]$id,
-                                    value =  data[[questions[[i]]$id]])
+                                    inputId = questions[[i]][["id"]],
+                                    value =  data[[questions[[i]][["id"]]]])
                 
               }
             }
@@ -366,8 +366,8 @@ quickform <- function(title = NULL,
     })
     
     #user-experience with shinyjs
-    observeEvent(input$user, {
-      if(input$user == 'return'){
+    observeEvent(input[["user"]], {
+      if(input[["user"]] == 'return'){
         shinyjs::show('userId')
         shinyjs::show('loadReturning')
         
@@ -376,10 +376,6 @@ quickform <- function(title = NULL,
         shinyjs::hide('loadReturning')
       }
     })
-    
-    #     output$d <- renderPrint({
-    #       requiredValues
-    # })
   }
   
   shinyApp(ui, server)
