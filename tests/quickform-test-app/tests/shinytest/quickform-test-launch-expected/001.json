@@ -1,9 +1,13 @@
 {
   "input": {
-    "race": "White",
+    "age": 50,
+    "ethnicity": "No",
+    "name": "",
+    "shortanswer": "",
     "sidebarCollapsed": true,
     "sidebarItemExpanded": null,
-    "submit": 0
+    "submit": 0,
+    "user_opinion": ""
   },
   "output": {
     "returningUser": null

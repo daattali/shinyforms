@@ -38,34 +38,37 @@
 #' title = "My Survey",
 #' description = 'Describe your survey here',
 #' questions = list(
+#'   list(id = 'name',
+#'        type = 'shortanswer',
+#'        question = 'What is your name?'),
 #'   list(id = "age",
 #'        type = "numeric",
 #'        question = "Age (yrs)",
-#'        required = T),
+#'        required = TRUE),
 #'   list(id = 'ethnicity',
 #'        type = "multiplechoice",
 #'        question = "Are you of Hispanic, Latino, or of Spanish origin?" ,
 #'        choices = list('No', 'Yes'),
-#'        required = T),
+#'        required = TRUE),
 #'   list(id = 'shortanswer',
 #'        type = 'shortanswer',
 #'        question = 'One word to describe this app',
-#'        required = T),
+#'        required = TRUE),
 #'   list(id = 'user_opinion',
 #'        type = 'paragraph',
 #'        question= 'Please provide any feedback')
 #' ),
-#' gmail = F,
+#' gmail = FALSE,
 #' folder = 'shinyforms'
 #' )
 #' }
 quickform <- function(title = NULL,
                       description = NULL,
                       questions = NULL,
-                      gmail = F,
+                      gmail = FALSE,
                       folder = 'shinyforms',
-                      returningUser = F,
-                      emailId = F,
+                      returningUser = FALSE,
+                      emailId = FALSE,
                       subject = 'Your survey ID',
                       color = '#2e77ff'){
   
@@ -86,7 +89,7 @@ quickform <- function(title = NULL,
   
   #setup storage locations and authentications to google services
   if(gmail == FALSE){
-    dir.create(folder, showWarnings = F)
+    dir.create(folder, showWarnings = FALSE)
   } else {
     if(grepl('@', gmail)){
       googledrive::drive_auth(email = gmail, cache = '.secrets')
@@ -121,8 +124,8 @@ quickform <- function(title = NULL,
   #this is a shinydashboard with no header or sidebar
   #mimics looks of a google form
   ui <- dashboardPage(
-          dashboardHeader(disable = T),
-          dashboardSidebar(disable = T),
+          dashboardHeader(disable = TRUE),
+          dashboardSidebar(disable = TRUE),
           dashboardBody(
             id = 'dashboardBody',
             #style = paste0("background-color:", bgColor, ";"),
@@ -179,7 +182,7 @@ quickform <- function(title = NULL,
             if(gmail == FALSE){
               utils::write.csv(data,
                                file.path(folder, paste0(filename, '.csv.')),
-                               row.names = F)
+                               row.names = FALSE)
             } else {
               saveToDrive(data = data, filename = rv$filename, folder = folder)
             }
@@ -190,7 +193,7 @@ quickform <- function(title = NULL,
               if(gmail == FALSE){
                 utils::write.csv(data,
                                  file = file.path(folder, paste0(input$userId, '.csv')),
-                                 row.names = F)
+                                 row.names = FALSE)
                 setProgress(1)
               } else {
                 userDataOverwrite <- googledrive::drive_find(input$userId, n_max = 1)
@@ -209,7 +212,7 @@ quickform <- function(title = NULL,
           if(gmail == FALSE){
             utils::write.csv(data, 
                              file = file.path(folder, paste0(filename, '.csv')),
-                             row.names = F)
+                             row.names = FALSE)
             setProgress(1)
           } else {
             saveToDrive(data = data, filename = filename, folder = folder)
@@ -219,7 +222,6 @@ quickform <- function(title = NULL,
     })
       #once complete -  update a reactive value to launch a modal
       rv$saved <- rv$saved + 1
-      
       shinyjs::reset('dashboardBody')
     })
     
@@ -227,7 +229,7 @@ quickform <- function(title = NULL,
       cat(rv$filename)
     })
     
-    observeEvent(rv$saved, ignoreInit = T, {
+    observeEvent(rv$saved, ignoreInit = TRUE, {
       if(returningUser){
         shiny::showModal(
           shiny::modalDialog(
@@ -256,7 +258,7 @@ quickform <- function(title = NULL,
       }
     })
     
-    observeEvent(input$ok, ignoreInit = T, {
+    observeEvent(input$ok, ignoreInit = TRUE, {
       #if ok is clicked in modal dialogue and a valid email is entered - email id to address with gmailr if emailId is T
       if(emailId){
         if(grepl('@', input$address)){
@@ -285,13 +287,13 @@ quickform <- function(title = NULL,
     output$returningUser <- renderUI({
       if(returningUser){
         box(width = NULL,
-            solidHeader = T,
+            solidHeader = TRUE,
             title = 'Returning User?',
             radioButtons('user',
                          label = NULL,
                          choices = list('New User' = 'new',
                                         'Returning' = 'return'),
-                         inline = T),
+                         inline = TRUE),
             shiny::textInput('userId', label = 'Enter ID', placeholder = 'Enter ID Here'),
             shiny::actionButton('loadReturning', 'Load')
         )
@@ -317,7 +319,7 @@ quickform <- function(title = NULL,
               data <- googlesheets4::read_sheet(userFile)
             } else if(gmail == FALSE){
               #local file storage
-              userFile <- list.files(folder, pattern = input$userId, full.names = T)
+              userFile <- list.files(folder, pattern = input$userId, full.names = TRUE)
               if(identical(userFile, character(0))) showNotification('No file matches that ID', type = 'error')
               req(!identical(userFile, character(0)))
               data <- utils::read.csv(userFile)
@@ -325,16 +327,15 @@ quickform <- function(title = NULL,
             #loop through every questions list element
             #update the shiny widget with the saved value in the google sheet
             for(i in seq_along(questions)){
-              if (questions[[i]]$type == "numeric") {
+              if (questions[[i]]$type == "numeric"){
                 updateNumericInput(session = session,
                                    inputId = questions[[i]]$id,
                                    value =  data[[questions[[i]]$id]])
                 
-              } else if (questions[[i]]$type == "checkbox") {
+              } else if (questions[[i]]$type == "checkbox"){
                 updateCheckboxInput(session = session,
                                     inputId = questions[[i]]$id,
                                     value =  data[[questions[[i]]$id]])
-                
                 
               } else if (questions[[i]]$type == 'multiplechoice'){
                 updateRadioButtons(session = session,
@@ -346,7 +347,6 @@ quickform <- function(title = NULL,
                                   inputId =  questions[[i]]$id,
                                   selected =  data[[questions[[i]]$id]])
                 
-                
               } else if (questions[[i]]$type == 'shortanswer'){
                 updateTextInput(session = session,
                                 inputId =  questions[[i]]$id,
@@ -357,15 +357,6 @@ quickform <- function(title = NULL,
                                     inputId = questions[[i]]$id,
                                     value =  data[[questions[[i]]$id]])
                 
-              } else if (questions[[i]]$type == 'height'){
-                updateSelectInput(session = session,
-                                  inputId =  questions[[i]]$id,
-                                  selected =  data[[questions[[i]]$id]])
-                
-              } else if (questions[[i]]$type == 'race'){
-                updateRadioButtons(session = session,
-                                   inputId =  questions[[i]]$id,
-                                   selected =  data[[questions[[i]]$id]])
               }
             }
           })
@@ -384,7 +375,6 @@ quickform <- function(title = NULL,
         shinyjs::hide('userId')
         shinyjs::hide('loadReturning')
       }
-      
     })
     
     #     output$d <- renderPrint({

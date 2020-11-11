@@ -55,7 +55,7 @@ multipleChoice <- function(id, choices){
   shiny::radioButtons(inputId = id,
                       label = NULL,
                       choices = choices,
-                      inline = F)
+                      inline = FALSE)
 }
 
 
@@ -66,7 +66,7 @@ multipleChoice <- function(id, choices){
 checkbox <- function(id, choices){
   shiny::checkboxInput(inputId =  id,
                        label = NULL,
-                       value= F)
+                       value= FALSE)
 }
 
 #' Convenient wrappers for shiny widgets using the googleForm lingo

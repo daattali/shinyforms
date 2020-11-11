@@ -1,5 +1,5 @@
 app <- ShinyDriver$new("../../")
 app$snapshotInit("quickform-test-launch")
 
-app$setInputs(race = "White")
+app$setInputs(age = 50)
 app$snapshot()
