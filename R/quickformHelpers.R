@@ -9,9 +9,9 @@ formQ <- function(question){
   #decide what widget to make
   #all the shiny widgets have been renamed with wrappers to mimic the google form options
   #built off of shinyforms
-  if (question$type == "numeric") {
+  if (question$type == "numeric"){
     input <- shiny::numericInput(question$id, NULL, 0)
-  } else if (question$type == "checkbox") {
+  } else if (question$type == "checkbox"){
     input <- shiny::checkboxInput(question$id, question$choices)
   } else if (question$type == 'multiplechoice'){
     input <- multipleChoice(question$id, question$choices)
@@ -21,22 +21,13 @@ formQ <- function(question){
     input <- shortAnswer(question$id)
   } else if (question$type == 'paragraph'){
     input <- paragraph(question$id)
-  } else if (question$type == 'height'){
-    input <- selectHeight(question$id)
-  } else if (question$type == 'race'){
-    input <- multipleChoice(question$id, c('American Indian or Alaska Native',
-                                           'Asian',
-                                            'Black or African American',
-                                            'Native Hawaiian or Other Pacific Islander',
-                                            'White',
-                                            'Other'))
   } else {
     stop('Not a valid question type')
   }
 
   #if questions is marked as required add a 'Required *' tag before widget
   if(!is.null(question$required)){
-    if (question$required) {
+    if (question$required){
       ui <- shiny::tagList(shiny::h5('Required *', style = 'color:#fd0800;'), input)
     } else {
       ui <- input
@@ -49,7 +40,7 @@ formQ <- function(question){
   #put everything in a dashboard box to make it look like a Google Form
   #one widget to a box
   shinydashboard::box(width = NULL,
-                      solidHeader = T,
+                      solidHeader = TRUE,
                       title = question$question,
                       ui)
 
@@ -107,32 +98,6 @@ paragraph <- function(id){
                        width = '100%')
 }
 
-#' Helper for height wrapper
-#' @description Makes a list of height in feet-height notation
-#' @noRd
-heightChoices <- function(){
-  ft <- 0:7
-  inch <-  1:11
-  ht <- expand.grid(ft, inch)
-  ht <- ht[order(ht$Var1),]
-
-  ht_string <- vector()
-  for(i in 1:nrow(ht)){
-    ht_string[[i]] <- paste0(ht$Var1[[i]], "-", ht$Var2[[i]])
-  }
-  return(ht_string)
-}
-
-#' Convenient wrapper for making a selectInput about choosing a person's height in feet and inches
-#' @param id an inputId
-#' @noRd
-selectHeight <- function(id){
-  shiny::selectInput(inputId = id,
-                     label = NULL,
-                     choices = heightChoices())
-}
-
-
 #' Check for NULL required inputs
 #' @param question a question list 
 #' @param input the input reatcive list created by shiny
@@ -163,7 +128,6 @@ getUserInput <- function(question, input){
   names(x) <- question$id
   x
 }
-
 
 #' Check that questions are a list
 #' @noRd
