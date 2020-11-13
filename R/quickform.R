@@ -66,76 +66,79 @@ quickform <- function(title = NULL,
                       description = NULL,
                       questions = NULL,
                       gmail = FALSE,
-                      folder = 'shinyforms',
+                      folder = "shinyforms",
                       returningUser = FALSE,
                       emailId = FALSE,
-                      subject = 'Your survey ID',
-                      color = '#2e77ff'){
+                      subject = "Your survey ID",
+                      color = "#2e77ff"){
   
-  if(!is.character(title)) stop("The 'title' argument must be a character string.")
-  if(!is.character(description)) stop("The 'description' argument must be a character string.")
-  if(!is.list(questions)) stop("The 'questions' argument must contain a list.")
-  lapply(questions, checkQuestionIsList)
-  if(!is.logical(returningUser)) stop("'returningUser' must be TRUE/FALSE")
-  if(!is.logical(emailId)) stop("'emailId' must be TRUE/FALSE")
+  checkmate::assertString(title)
+  checkmate::assertString(description)
+  checkmate::assertList(questions, min.len = 1)
+  lapply(questions, checkmate::assertList, min.length = 3) #every questions needs 1) ID, 2) A Question, and 3) Input type
+  if(gmail != FALSE) checkmate::assertString(gmail, pattern = "@")
+  checkmate::assertLogical(returningUser)
+  checkmate::assertLogical(emailId)
+  checkmate::assertString(subject)
+  checkmate::assertString(color)
 
-  quickformCSS <- paste0("body { background-color:", 
-                                 scales::alpha(color, 0.5),
-                                  "; 
-                                }
+  quickformCSS <- paste0("body { 
+                                 background-color:",  scales::alpha(color, 0.5), "; 
+                               }
                          
-                         .quickform-title {  border-radius: 3px; 
-                                             margin-top: 8px;
-                                             background: white;  
-                                             border-top: 3px solid", color, ";  
-                                             margin-bottom: 20px; width = 100%; 
-                                             box-shadow: 0 1px 1px rgba(0, 0, 0, 0) 
-                                            }
+                         .quickform-title { 
+                                            border-radius: 3px; 
+                                            margin-top: 8px;
+                                            background: white;  
+                                            border-top: 3px solid", color, ";  
+                                            margin-bottom: 20px; 
+                                            width: 100%; 
+                                            box-shadow: 0 1px 1px rgba(0, 0, 0, 0) 
+                                          }
   
-                           .quickform { border-radius: 3px; 
-                                        margin-top: 4px;
-                                        background: white;  
-                                        border-top: 3px solid white;  
-                                        margin-bottom: 20px;
-                                        width = 100%; 
-                                        box-shadow: 0 1px 1px rgba(0, 0, 0, 0);
-                                      }
+                          .quickform { 
+                                       border-radius: 3px; 
+                                       margin-top: 4px;
+                                       background: white;  
+                                       border-top: 3px solid white;  
+                                       margin-bottom: 20px;
+                                       width: 100%; 
+                                       box-shadow: 0 1px 1px rgba(0, 0, 0, 0);
+                                     }
                                               
-                            .header { height: 40px;
+                           .header { 
+                                      height: 40px;
                                       font-size: 17px;
                                       padding: 8px;
-                                    }
+                                   }
                                     
-                             .body { margin-top: 0;
-                                     overflow: auto;
-                                     font-size: 14px;
-                                     padding: 8px;
-                                     width: 100%;
+                           .body {  
+                                   margin-top: 0;
+                                   overflow: auto;
+                                   font-size: 14px;
+                                   padding: 8px;
+                                   width: 100%;
                                     }
                                           
-                                 * { font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                                                color: #444 
-                                   }
+                           * { 
+                               font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                               color: #444 
+                             }
                          ")
   
   #setup storage locations and authentications to google services
   if(gmail == FALSE){
     dir.create(folder, showWarnings = FALSE)
   } else {
-    if(grepl('@', gmail)){
       googledrive::drive_auth(email = gmail, cache = '.secrets')
       googlesheets4::gs4_auth(token = googledrive::drive_token())
       # Create new sheets folder for responses
       #if folder does not exist create it
       find_folder <- googledrive::drive_find(folder, n_max = 10)
       find_folder <- find_folder[find_folder[["name"]] == folder,]
-      
       if(nrow(find_folder) == 0){
         googledrive::drive_mkdir(folder)
       }
-    } else {
-      stop("Not a valid email address - does not contain an '@' sign")
-    }
   }
   #if the user wants the participants to be able to allow people to edit/return to update survey
   #option to email unique id with gmailr
@@ -181,7 +184,6 @@ quickform <- function(title = NULL,
           req(nchar(input[["userId"]]) == 21)
         }
       }
-      
      #check to see if any required values are NULL - if so stop reactivity and show error informing user to answer all required
       lapply(questions, checkRequired, input = input)
       
@@ -203,7 +205,6 @@ quickform <- function(title = NULL,
             } else {
               saveToDrive(data = data, filename = filename, folder = folder)
             }
-            setProgress(1)
           } else if(input[["user"]] == "return"){
              #if is returning user and local storage write to disk
             rv[["filename"]] <- input[["userId"]]
@@ -211,7 +212,6 @@ quickform <- function(title = NULL,
                 utils::write.csv(data,
                                  file = file.path(folder, paste0(input[["userId"]], '.csv')),
                                  row.names = FALSE)
-                setProgress(1)
               } else {
                 userDataOverwrite <- googledrive::drive_find(input[["userId"]], n_max = 1)
                 #check to make sure user supplied ID matches a file on drive
@@ -222,7 +222,6 @@ quickform <- function(title = NULL,
                   data[["id"]] <- input[["userId"]]
                   googlesheets4::write_sheet(data, ss = userDataOverwrite, sheet = 'data')
                 }
-              setProgress(1)
              } 
           } 
         } else { #if non returningUser
@@ -230,12 +229,11 @@ quickform <- function(title = NULL,
             utils::write.csv(data, 
                              file = file.path(folder, paste0(filename, '.csv')),
                              row.names = FALSE)
-            setProgress(1)
           } else {
             saveToDrive(data = data, filename = filename, folder = folder)
-            setProgress(1)
          }
         }
+      setProgress(1)
     })
       #once complete -  update a reactive value to launch a modal
       rv[["saved"]] <- rv[["saved"]] + 1

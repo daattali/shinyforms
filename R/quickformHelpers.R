@@ -9,7 +9,7 @@ titleBox <- function(title, description){
 
 #' Creates a plain AdminLTE like box
 #' @noRd
-contentBox <- function(question, ui){
+questionBox <- function(question, ui){
   div(class = 'quickform',
       div(class = 'header', question),
       div(class = "body", ui)
@@ -26,7 +26,7 @@ formQ <- function(question){
   #decide what widget to make
   #all the shiny widgets have been renamed with wrappers to mimic the google form options
   #built off of shinyforms
-  if (question[["type"]] == "numeric"){
+  if(question[["type"]] == "numeric"){
     input <- shiny::numericInput(question[["id"]], NULL, 0, width = "100%")
   } else if(question[["type"]] == "checkbox"){
     input <- shiny::checkboxInput(question[["id"]], question[["choices"]])
@@ -56,7 +56,7 @@ formQ <- function(question){
   if(is.null(question[["question"]])) stop('Every question needs to ask a question or give a propmt with `question=` in the list')
   #put everything in a dashboard box to make it look like a Google Form
   #one widget to a box
-  contentBox(question[["question"]], ui)
+  questionBox(question[["question"]], ui)
 }
 
 #' Convenient wrappers for shiny widgets using the googleForm lingo
@@ -141,10 +141,4 @@ getUserInput <- function(question, input){
   x <- data.frame(value = input[[question[["id"]]]])
   names(x) <- question[["id"]]
   x
-}
-
-#' Check that questions are a list
-#' @noRd
-checkQuestionIsList <- function(question){
-  if(!is.list(question)) stop('Every element in "questions" must be a list.')
 }
