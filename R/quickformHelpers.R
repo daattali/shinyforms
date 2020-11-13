@@ -1,3 +1,20 @@
+#' Creates an AdminLTE like Box w/ colored top
+#' @noRd
+titleBox <- function(title, description){
+  div(class = 'quickform-title',
+      div(class = 'header', title),
+      div(class = "body", description)
+  )
+}
+
+#' Creates a plain AdminLTE like box
+#' @noRd
+contentBox <- function(question, ui){
+  div(class = 'quickform',
+      div(class = 'header', question),
+      div(class = "body", ui)
+  )
+}
 
 #' Generates UI
 #' @description This is the 'muscle' behind the UI building and taken from the UI of shinyforms. It takes a list(id, type, etc.) and decides what to make. Used with lapply in main quickform() function over questions arguments.
@@ -10,7 +27,7 @@ formQ <- function(question){
   #all the shiny widgets have been renamed with wrappers to mimic the google form options
   #built off of shinyforms
   if (question[["type"]] == "numeric"){
-    input <- shiny::numericInput(question[["id"]], NULL, 0)
+    input <- shiny::numericInput(question[["id"]], NULL, 0, width = "100%")
   } else if(question[["type"]] == "checkbox"){
     input <- shiny::checkboxInput(question[["id"]], question[["choices"]])
   } else if(question[["type"]] == 'multiplechoice'){
@@ -39,12 +56,7 @@ formQ <- function(question){
   if(is.null(question[["question"]])) stop('Every question needs to ask a question or give a propmt with `question=` in the list')
   #put everything in a dashboard box to make it look like a Google Form
   #one widget to a box
-  shinydashboard::box(width = NULL,
-                      solidHeader = TRUE,
-                      title = question[["question"]],
-                      ui)
-
-
+  contentBox(question[["question"]], ui)
 }
 
 #' Convenient wrappers for shiny widgets using the googleForm lingo
@@ -76,7 +88,8 @@ checkbox <- function(id, choices){
 dropdown <- function(id, choices){
   shiny::selectInput(inputId = id,
                      label = NULL,
-                     choices = choices)
+                     choices = choices,
+                     width = "100%")
 }
 
 
@@ -85,7 +98,8 @@ dropdown <- function(id, choices){
 #' @noRd
 shortAnswer <- function(id){
   shiny::textInput(inputId = id,
-                   label = NULL)
+                   label = NULL,
+                   width = "100%")
 
 }
 
@@ -93,9 +107,9 @@ shortAnswer <- function(id){
 #' @param id an inputId
 #' @noRd
 paragraph <- function(id){
-  shiny::textAreaInput(inputId = id,
-                       label = NULL,
-                       width = '100%')
+  shiny::tagAppendAttributes(shiny::textAreaInput(inputId = id,
+                                                  label = NULL),
+                             style = 'width: 100%;')
 }
 
 #' Check for NULL required inputs

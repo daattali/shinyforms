@@ -13,7 +13,6 @@ Imports:
     DT, 
     shiny (>= 0.13.2.9003),
     shinyjs (>= 0.5.2),
-    shinydashboard,
     googledrive, 
     googlesheets4,
     gmailr,

@@ -78,14 +78,45 @@ quickform <- function(title = NULL,
   lapply(questions, checkQuestionIsList)
   if(!is.logical(returningUser)) stop("'returningUser' must be TRUE/FALSE")
   if(!is.logical(emailId)) stop("'emailId' must be TRUE/FALSE")
+
+  quickformCSS <- paste0("body { background-color:", 
+                                 scales::alpha(color, 0.5),
+                                  "; 
+                                }
+                         
+                         .quickform-title {  border-radius: 3px; 
+                                             margin-top: 8px;
+                                             background: white;  
+                                             border-top: 3px solid", color, ";  
+                                             margin-bottom: 20px; width = 100%; 
+                                             box-shadow: 0 1px 1px rgba(0, 0, 0, 0) 
+                                            }
   
-  bgColor <- scales::alpha(color, 0.5)
-  quickformCSS <- paste0("shinyforms-ui .mandatory_star { color: #db4437; font-size: 20px; line-height: 0; }
-                         .box.box-primary { border-top-color:", color, ";}
-                         body {background-color:", bgColor, ";}
-                         .content-wrapper, .right-side {background-color:", bgColor, ";}
-                         .skin-blue .left-side, .skin-blue .main-sidebar, .skin-blue .wrapper {
-                         background-color: #fff;}")
+                           .quickform { border-radius: 3px; 
+                                        margin-top: 4px;
+                                        background: white;  
+                                        border-top: 3px solid white;  
+                                        margin-bottom: 20px;
+                                        width = 100%; 
+                                        box-shadow: 0 1px 1px rgba(0, 0, 0, 0);
+                                      }
+                                              
+                            .header { height: 40px;
+                                      font-size: 17px;
+                                      padding: 8px;
+                                    }
+                                    
+                             .body { margin-top: 0;
+                                     overflow: auto;
+                                     font-size: 14px;
+                                     padding: 8px;
+                                     width: 100%;
+                                    }
+                                          
+                                 * { font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                                                color: #444 
+                                   }
+                         ")
   
   #setup storage locations and authentications to google services
   if(gmail == FALSE){
@@ -106,7 +137,7 @@ quickform <- function(title = NULL,
       stop("Not a valid email address - does not contain an '@' sign")
     }
   }
-    #if the user wants the participants to be able to allow people to edit/return to update survey
+  #if the user wants the participants to be able to allow people to edit/return to update survey
   #option to email unique id with gmailr
   if(returningUser){
     if(emailId){
@@ -121,32 +152,21 @@ quickform <- function(title = NULL,
     }}
   
   #user interface
-  #this is a shinydashboard with no header or sidebar
   #mimics looks of a google form
-  ui <- dashboardPage(
-          dashboardHeader(disable = TRUE),
-          dashboardSidebar(disable = TRUE),
-          dashboardBody(
-            id = 'dashboardBody',
-            #style = paste0("background-color:", bgColor, ";"),
+  ui <- fluidPage(
+          id = 'app',
             shinyjs::useShinyjs(),
             shinyjs::inlineCSS(quickformCSS),
-              fluidRow(
                 column(3),
                 column(6,
-                  box(width = NULL,
-                      status = 'primary',
-                      title = title,
-                      description),
+                  titleBox(title, description),
                   uiOutput('returningUser'),
                   lapply(questions, formQ),
                   actionButton('submit',
                                'Submit',
                                 style = paste0("background-color: ", color, "; color:#fff;"))
                     ) # column close
-                  ) # row close
-                ) # dashboard body close
-              ) # dashboard page close
+                )
   
   server <- function(input, output, session) {
     
@@ -167,14 +187,11 @@ quickform <- function(title = NULL,
       
       withProgress(message = 'Saving', {
         setProgress(0.2)
-        #probably a better way to do this
-        #removing uneeded rows from the results that prevent from converting list to data.frame
         responses <- lapply(questions, getUserInput, input = input)
         setProgress(0.35)
         data <- do.call('cbind', responses)
         filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(stats::runif(1, 1000000, 2000000)))
         setProgress(0.5)
-        
         if(returningUser){
           if(input[["user"]] == 'new'){
             rv[["filename"]] <- filename
@@ -222,7 +239,7 @@ quickform <- function(title = NULL,
     })
       #once complete -  update a reactive value to launch a modal
       rv[["saved"]] <- rv[["saved"]] + 1
-      shinyjs::reset('dashboardBody')
+      shinyjs::reset("app")
     })
     
     output[["showId"]] <- renderPrint({
@@ -286,20 +303,19 @@ quickform <- function(title = NULL,
     #makes the returning user UI box
     output[["returningUser"]] <- renderUI({
       if(returningUser){
-        box(width = NULL,
-            solidHeader = TRUE,
-            title = "Returning User?",
-            radioButtons("user",
+        contentBox(
+            question = "Returning User?",
+            ui = shiny::tagList(radioButtons("user",
                          label = NULL,
                          choices = list("New User" = "new",
                                         "Returning" = "return"),
                          inline = TRUE),
             shiny::textInput("userId", label = "Enter ID", placeholder = "Enter ID Here"),
             shiny::actionButton("loadReturning", "Load")
+            )
         )
       }
     })
-    
     
     #reactive events that occur if a returning user ID is entered
     #the app will search for a matching filename to the unique ID

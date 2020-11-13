@@ -8,10 +8,10 @@ quickform(
   title = NULL,
   description = NULL,
   questions = NULL,
-  gmail = F,
+  gmail = FALSE,
   folder = "shinyforms",
-  returningUser = F,
-  emailId = F,
+  returningUser = FALSE,
+  emailId = FALSE,
   subject = "Your survey ID",
   color = "#2e77ff"
 )
@@ -64,24 +64,27 @@ quickform(
 title = "My Survey",
 description = 'Describe your survey here',
 questions = list(
+  list(id = 'name',
+       type = 'shortanswer',
+       question = 'What is your name?'),
   list(id = "age",
        type = "numeric",
        question = "Age (yrs)",
-       required = T),
+       required = TRUE),
   list(id = 'ethnicity',
        type = "multiplechoice",
        question = "Are you of Hispanic, Latino, or of Spanish origin?" ,
        choices = list('No', 'Yes'),
-       required = T),
+       required = TRUE),
   list(id = 'shortanswer',
        type = 'shortanswer',
        question = 'One word to describe this app',
-       required = T),
+       required = TRUE),
   list(id = 'user_opinion',
        type = 'paragraph',
        question= 'Please provide any feedback')
 ),
-gmail = F,
+gmail = FALSE,
 folder = 'shinyforms'
 )
 }
