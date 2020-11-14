@@ -30,7 +30,7 @@
 #'
 #' @return A Shiny App
 #' @export
-#' @import shiny shinydashboard magrittr
+#' @import shiny 
 #' @examples
 #' if(interactive()){
 #' library(shinyforms)
