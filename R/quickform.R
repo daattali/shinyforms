@@ -75,7 +75,7 @@ quickform <- function(title = NULL,
   checkmate::assertString(title)
   checkmate::assertString(description)
   checkmate::assertList(questions, min.len = 1)
-  lapply(questions, checkmate::assertList, min.length = 3) #every questions needs 1) ID, 2) A Question, and 3) Input type
+  lapply(questions, checkmate::assertList, min.len = 3) #"Every question list needs at least 3 named elements 'id', 'type', and 'question'"
   if(gmail != FALSE) checkmate::assertString(gmail, pattern = "@")
   checkmate::assertLogical(returningUser)
   checkmate::assertLogical(emailId)
@@ -164,7 +164,7 @@ quickform <- function(title = NULL,
                 column(6,
                   titleBox(title, description),
                   uiOutput('returningUser'),
-                  lapply(questions, formQ),
+                  lapply(questions, createQuestion),
                   actionButton('submit',
                                'Submit',
                                 style = paste0("background-color: ", color, "; color:#fff;"))
@@ -301,7 +301,7 @@ quickform <- function(title = NULL,
     #makes the returning user UI box
     output[["returningUser"]] <- renderUI({
       if(returningUser){
-        contentBox(
+        questionBox(
             question = "Returning User?",
             ui = shiny::tagList(radioButtons("user",
                          label = NULL,

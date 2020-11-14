@@ -20,12 +20,11 @@ questionBox <- function(question, ui){
 #' @description This is the 'muscle' behind the UI building and taken from the UI of shinyforms. It takes a list(id, type, etc.) and decides what to make. Used with lapply in main quickform() function over questions arguments.
 #' @param question A list containing id, type, required, and (optionally) choices
 #' @noRd
-formQ <- function(question){
+createQuestion <- function(question){
 
-  if(is.null(question[["id"]])) stop('Every question needs an Id')
+  checkmate::assertString(question[["id"]])
   #decide what widget to make
   #all the shiny widgets have been renamed with wrappers to mimic the google form options
-  #built off of shinyforms
   if(question[["type"]] == "numeric"){
     input <- shiny::numericInput(question[["id"]], NULL, 0, width = "100%")
   } else if(question[["type"]] == "checkbox"){
@@ -53,8 +52,8 @@ formQ <- function(question){
     ui <- input
   }
 
-  if(is.null(question[["question"]])) stop('Every question needs to ask a question or give a propmt with `question=` in the list')
-  #put everything in a dashboard box to make it look like a Google Form
+  checkmate::assertString(question[["question"]])
+  #put everything in a box to make it look like a Google Form
   #one widget to a box
   questionBox(question[["question"]], ui)
 }
@@ -128,10 +127,13 @@ checkRequired <- function(question, input){
 }
 
 #' Save data to google drive
+#' @description Currently not able to create a google sheet in a specific folder (see: https://github.com/tidyverse/googlesheets4/issues/111).
+#' Current approach is to make a sheet and move it. 
+#' Alternative would be to write to temp file locally and upload to specific folder.
 #' @noRd
 saveToDrive <- function(data, filename, folder){
   googlesheets4::gs4_create(name = filename, sheets = data)
-  setProgress(0.75, detail = 'Uploading results to google drive')
+  setProgress(0.75, detail = 'Please wait...')
   googledrive::drive_mv(filename, path = file.path(folder, filename))
 }
 
