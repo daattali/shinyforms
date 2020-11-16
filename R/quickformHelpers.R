@@ -16,13 +16,15 @@ questionBox <- function(question, ui){
   )
 }
 
-#' Generates UI
+#' Generates UI for quickform
 #' @description This is the 'muscle' behind the UI building and taken from the UI of shinyforms. It takes a list(id, type, etc.) and decides what to make. Used with lapply in main quickform() function over questions arguments.
 #' @param question A list containing id, type, required, and (optionally) choices
 #' @noRd
 createQuestion <- function(question){
 
   checkmate::assertString(question[["id"]])
+  checkmate::assertString(question[["type"]])
+  checkmate::assertString(question[["question"]])
   #decide what widget to make
   #all the shiny widgets have been renamed with wrappers to mimic the google form options
   if(question[["type"]] == "numeric"){
@@ -40,7 +42,6 @@ createQuestion <- function(question){
   } else {
     stop('Not a valid question type')
   }
-
   #if questions is marked as required add a 'Required *' tag before widget
   if(!is.null(question[["required"]])){
     if (question[["required"]]){
@@ -51,11 +52,10 @@ createQuestion <- function(question){
   } else {
     ui <- input
   }
-
-  checkmate::assertString(question[["question"]])
   #put everything in a box to make it look like a Google Form
   #one widget to a box
   questionBox(question[["question"]], ui)
+  
 }
 
 #' Convenient wrappers for shiny widgets using the googleForm lingo

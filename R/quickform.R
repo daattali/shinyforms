@@ -13,17 +13,17 @@
 #'  
 #' @param title a character string. Title of the form/survey.
 #' @param description a character string. A description providing more information about the form/survey.
-#' @param questions a nested list of questions. Must contain 'id', 'type', 'question', and 'choices' (depending on the type of input) in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
+#' @param questions a nested list of questions. Must contain 'id', 'type', 'question', and 'choices' (depending on the type of input) in each list element. The widget types are based on the naming from Google Forms and must be one of the following: 
 #' "numeric", "checkbox", "multiplechoice", "dropdown", "paragraph", "shortanswer".  See example.
 #' @param gmail either FALSE to save data locally or your gmail account to store data in Google Drive and optionally to email IDs to users. 
 #' Each response is saved as an individual Google Sheet and is saved in the folder specified in the 'folder' argument. 
 #' Google Drive/Sheets authorization is cached in the shiny app directory in '.secrets'. Make sure to upload this file when deploying to a server (like shinyapps.io).
-#'  Similarily, gmailr authorization is stored in '.gm-secrets'.
+#' Similarily, gmailr authorization is stored in '.gm-secrets'.
 #' @param folder a character string specifying the folder on desktop/Google Drive to store results in.
-#' @param returningUser logical. Do you want provide users a ID# in order to return and edit/update their survey? Default is FALSE.
+#' @param returningUser logical. Do you want provide users an ID# in order to return and edit/update their survey? Default is FALSE.
 #' @param emailId logical.  Do you want to email ID to users?  Only implemented if "returningUser=T" and valid email is given to "gmail" argument.
 #'  Default is FALSE.
-#'   If TRUE, need to setup gmail credentials and move the json file into shiny app directory as 'credentials.json'.
+#'  If TRUE, need to setup gmail credentials and move the json file into quickform/shiny app directory as 'credentials.json'.
 #'  \href{https://github.com/r-lib/gmailr}{More info on gmailr package and setup}. 
 #' @param subject a character string. For the subject of your email. Default is 'Your survey ID'. Only used if "emailId=T".
 #' @param color a character string specifying a hex color or to theme the app. Default is blue ("#2e77ff"). Header of title box and submit button are the actual color and background is made semi-transparent `with scales::alpha(color, 0.5)`.
@@ -72,6 +72,7 @@ quickform <- function(title = NULL,
                       subject = "Your survey ID",
                       color = "#2e77ff"){
   
+  # check for correct user inputs
   checkmate::assertString(title)
   checkmate::assertString(description)
   checkmate::assertList(questions, min.len = 1)
@@ -81,7 +82,8 @@ quickform <- function(title = NULL,
   checkmate::assertLogical(emailId)
   checkmate::assertString(subject)
   checkmate::assertString(color)
-
+ 
+  # CSS to use for app
   quickformCSS <- paste0("body { 
                                  background-color:",  scales::alpha(color, 0.5), "; 
                                }
@@ -118,7 +120,7 @@ quickform <- function(title = NULL,
                                    font-size: 14px;
                                    padding: 8px;
                                    width: 100%;
-                                    }
+                                  }
                                           
                            * { 
                                font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -126,22 +128,21 @@ quickform <- function(title = NULL,
                              }
                          ")
   
-  #setup storage locations and authentications to google services
+  # setup storage locations and authentications to google services
   if(gmail == FALSE){
     dir.create(folder, showWarnings = FALSE)
   } else {
       googledrive::drive_auth(email = gmail, cache = '.secrets')
       googlesheets4::gs4_auth(token = googledrive::drive_token())
       # Create new sheets folder for responses
-      #if folder does not exist create it
       find_folder <- googledrive::drive_find(folder, n_max = 10)
       find_folder <- find_folder[find_folder[["name"]] == folder,]
       if(nrow(find_folder) == 0){
         googledrive::drive_mkdir(folder)
       }
   }
-  #if the user wants the participants to be able to allow people to edit/return to update survey
-  #option to email unique id with gmailr
+  # if the user wants the participants to be able to allow people to edit/return to update survey
+  # option to email unique id with {gmailr}
   if(returningUser){
     if(emailId){
       json_file <- list.files(pattern = 'credentials.json')
@@ -154,8 +155,7 @@ quickform <- function(title = NULL,
       gmailr::gm_auth(email = gmail, cache = '.gm-secrets')
     }}
   
-  #user interface
-  #mimics looks of a google form
+  #user interface - mimics looks of a google form
   ui <- fluidPage(
           id = 'app',
             shinyjs::useShinyjs(),
@@ -168,19 +168,19 @@ quickform <- function(title = NULL,
                   actionButton('submit',
                                'Submit',
                                 style = paste0("background-color: ", color, "; color:#fff;"))
-                    ) # column close
-                )
+                     ) # column close
+                   )
   
   server <- function(input, output, session) {
     
     rv <- reactiveValues(saved = 0)
     observeEvent(input[["submit"]], {
-      #check if returning user has entered a valid ID (or at least entered something really)
+      #check if returning user has entered a valid ID 
       if(returningUser){
-        if(input[["user"]] == 'return'){
-          if(input[["userId"]] == '') showNotification('Please enter ID if you are a returning user.')
+        if(input[["user"]] == "return"){
+          if(input[["userId"]] == "") showNotification("Please enter ID if you are a returning user.", type = "error")
           req(input[["userId"]])
-          if(nchar(input[["userId"]]) != 21) showNotification('Not a valid ID. Must be 21 characters', type = 'error')
+          if(nchar(input[["userId"]]) != 21) showNotification("Not a valid ID. Must be 21 characters", type = "error")
           req(nchar(input[["userId"]]) == 21)
         }
       }
