@@ -187,20 +187,20 @@ quickform <- function(title = NULL,
      #check to see if any required values are NULL - if so stop reactivity and show error informing user to answer all required
       lapply(questions, checkRequired, input = input)
       
-      withProgress(message = 'Saving', {
+      withProgress(message = "Saving", {
         setProgress(0.2)
         responses <- lapply(questions, getUserInput, input = input)
         setProgress(0.35)
-        data <- do.call('cbind', responses)
-        filename <- paste0(gsub( "[^[:alnum:]]", '', Sys.time()), round(stats::runif(1, 1000000, 2000000)))
+        data <- do.call("cbind", responses)
+        filename <- paste0(gsub( "[^[:alnum:]]", "", Sys.time()), round(stats::runif(1, 1000000, 2000000)))
         setProgress(0.5)
         if(returningUser){
-          if(input[["user"]] == 'new'){
+          if(input[["user"]] == "new"){
             rv[["filename"]] <- filename
             data[["id"]] <- filename
             if(gmail == FALSE){
               utils::write.csv(data,
-                               file.path(folder, paste0(filename, '.csv.')),
+                               file.path(folder, paste0(filename, ".csv")),
                                row.names = FALSE)
             } else {
               saveToDrive(data = data, filename = filename, folder = folder)
@@ -210,13 +210,13 @@ quickform <- function(title = NULL,
             rv[["filename"]] <- input[["userId"]]
               if(gmail == FALSE){
                 utils::write.csv(data,
-                                 file = file.path(folder, paste0(input[["userId"]], '.csv')),
+                                 file = file.path(folder, paste0(input[["userId"]], ".csv")),
                                  row.names = FALSE)
               } else {
                 userDataOverwrite <- googledrive::drive_find(input[["userId"]], n_max = 1)
                 #check to make sure user supplied ID matches a file on drive
                 if(nrow(userDataOverwrite) == 0){
-                  showNotification('Not a valid ID', type = 'error')
+                  showNotification("Not a valid ID", type = "error")
                  } else {
                   #if ID matches a file overwrite with new survey data
                   data[["id"]] <- input[["userId"]]
@@ -227,7 +227,7 @@ quickform <- function(title = NULL,
         } else { #if non returningUser
           if(gmail == FALSE){
             utils::write.csv(data, 
-                             file = file.path(folder, paste0(filename, '.csv')),
+                             file = file.path(folder, paste0(filename, ".csv")),
                              row.names = FALSE)
           } else {
             saveToDrive(data = data, filename = filename, folder = folder)
@@ -251,13 +251,13 @@ quickform <- function(title = NULL,
           title = "Response Saved!",
           "Your response has been saved. You can return to this survery and update your answers by entering in the following ID in the returning user section at the top of the form: ",
           br(),
-          verbatimTextOutput('showId'),
+          verbatimTextOutput("showId"),
           br(),
           #if user wants to email unique IDs to client show an email textInput
           if(emailId){
-            textInput('address',
-                      label = 'Would you like this emailed?',
-                      placeholder = 'yourEmail@here.com')
+            textInput("address",
+                      label = "Would you like this emailed?",
+                      placeholder = "yourEmail@here.com")
           },
           footer = tagList(
             modalButton("Cancel"),
@@ -281,14 +281,14 @@ quickform <- function(title = NULL,
             gmailr::gm_to(input[["address"]]) %>%
             gmailr::gm_from(gmail) %>%
             gmailr::gm_subject(subject) %>%
-            gmailr::gm_text_body(paste0('Thanks for taking the survey. Your returning ID is: ' , rv[["filename"]]))
+            gmailr::gm_text_body(paste0("Thanks for taking the survey. Your returning ID is: " , rv[["filename"]]))
           
           gmailr::gm_send_message(email)
-          shiny::showNotification('Email sent!', type = 'message')
+          shiny::showNotification("Email sent!", type = "message")
           removeModal()
             
           } else {
-             showNotification('Not a valid email address', type = 'error')
+             showNotification("Not a valid email address", type = "error")
             }
         
       } else {
@@ -329,7 +329,7 @@ quickform <- function(title = NULL,
               userFile <-  googledrive::drive_find(input[["userId"]], n_max = 1)
               if(nrow(userFile) == 0) showNotification("No file matches that ID", type = "error")
               req(nrow(userFile) == 1)
-              setProgress(0.5, detail = 'Updating')
+              setProgress(0.5, detail = "Updating")
               data <- googlesheets4::read_sheet(userFile)
             } else if(gmail == FALSE){
               #local file storage
@@ -374,7 +374,7 @@ quickform <- function(title = NULL,
               }
             }
           })
-          showNotification('Survey Loaded', type = 'message')
+          showNotification("Survey Loaded", type = "message")
         }
       }
     })
@@ -382,12 +382,12 @@ quickform <- function(title = NULL,
     #user-experience with shinyjs
     observeEvent(input[["user"]], {
       if(input[["user"]] == 'return'){
-        shinyjs::show('userId')
-        shinyjs::show('loadReturning')
+        shinyjs::show("userId")
+        shinyjs::show("loadReturning")
         
       } else {
-        shinyjs::hide('userId')
-        shinyjs::hide('loadReturning')
+        shinyjs::hide("userId")
+        shinyjs::hide("loadReturning")
       }
     })
   }
