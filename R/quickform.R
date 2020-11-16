@@ -31,6 +31,7 @@
 #' @return A Shiny App
 #' @export
 #' @import shiny 
+#' @importFrom gmailr "%>%"
 #' @examples
 #' if(interactive()){
 #' library(shinyforms)
