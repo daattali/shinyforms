@@ -21,21 +21,21 @@ quickform(
 
 \item{description}{a character string. A description providing more information about the form/survey.}
 
-\item{questions}{a nested list of questions. Must contain 'id', 'type', 'question', and 'choices' (depending on the type of input) in each listed list element. The widget types are based on the naming from Google Forms and must be one of the following: 
+\item{questions}{a nested list of questions. Must contain 'id', 'type', 'question', and 'choices' (depending on the type of input) in each list element. The widget types are based on the naming from Google Forms and must be one of the following: 
 "numeric", "checkbox", "multiplechoice", "dropdown", "paragraph", "shortanswer".  See example.}
 
 \item{gmail}{either FALSE to save data locally or your gmail account to store data in Google Drive and optionally to email IDs to users. 
 Each response is saved as an individual Google Sheet and is saved in the folder specified in the 'folder' argument. 
 Google Drive/Sheets authorization is cached in the shiny app directory in '.secrets'. Make sure to upload this file when deploying to a server (like shinyapps.io).
- Similarily, gmailr authorization is stored in '.gm-secrets'.}
+Similarily, gmailr authorization is stored in '.gm-secrets'.}
 
 \item{folder}{a character string specifying the folder on desktop/Google Drive to store results in.}
 
-\item{returningUser}{logical. Do you want provide users a ID# in order to return and edit/update their survey? Default is FALSE.}
+\item{returningUser}{logical. Do you want provide users an ID# in order to return and edit/update their survey? Default is FALSE.}
 
 \item{emailId}{logical.  Do you want to email ID to users?  Only implemented if "returningUser=T" and valid email is given to "gmail" argument.
 Default is FALSE.
- If TRUE, need to setup gmail credentials and move the json file into shiny app directory as 'credentials.json'.
+If TRUE, need to setup gmail credentials and move the json file into quickform/shiny app directory as 'credentials.json'.
 \href{https://github.com/r-lib/gmailr}{More info on gmailr package and setup}.}
 
 \item{subject}{a character string. For the subject of your email. Default is 'Your survey ID'. Only used if "emailId=T".}
