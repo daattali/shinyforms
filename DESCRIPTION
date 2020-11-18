@@ -1,5 +1,5 @@
 Package: shinyforms
-Title: Description
+Title: Shiny extension for creating forms and surveys.
 Version: 0.0.0.9000
 Authors@R: person("Dean", "Attali", email = "daattali@gmail.com",
     role = c("aut", "cre"))
@@ -12,7 +12,12 @@ Imports:
     digest (>= 0.6.8),
     DT, 
     shiny (>= 0.13.2.9003),
-    shinyjs (>= 0.5.2)
+    shinyjs (>= 0.5.2),
+    googledrive, 
+    googlesheets4,
+    gmailr,
+    scales,
+    checkmate
 Suggests:
     knitr (>= 1.7),
     rmarkdown,
@@ -20,4 +25,4 @@ Suggests:
 License: MIT + file LICENSE
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1

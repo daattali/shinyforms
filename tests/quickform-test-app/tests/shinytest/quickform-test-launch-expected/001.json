@@ -1,0 +1,16 @@
+{
+  "input": {
+    "age": 50,
+    "ethnicity": "No",
+    "name": "",
+    "shortanswer": "",
+    "submit": 0,
+    "user_opinion": ""
+  },
+  "output": {
+    "returningUser": null
+  },
+  "export": {
+
+  }
+}
