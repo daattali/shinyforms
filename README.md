@@ -4,6 +4,8 @@
 
 ## Note: The work on this package has paused, and it's currently looking for funding. Please contact me if your company would like to sponsor/fund this project. I receive a lot of emails about this package, but I cannot continue work on it without proper funding.
 
+## [Click here to sponsor my work on shiny packages](https://github.com/sponsors/daattali/), and email me afterwards if you'd like me to continue working on shinyforms.
+
 - [What does shinyforms do?](#what-does-shinyforms-do)
 - [But, why?](#buy-why)
 - [How do I use this?](#how-do-i-use-this)
