@@ -6,6 +6,13 @@
 
 ## [Click here to sponsor my work on shiny packages](https://github.com/sponsors/daattali/), and email me afterwards if you'd like me to continue working on shinyforms.
 
+<p align="center">
+
+<a style="display: inline-block;" href="https://github.com/sponsors/daattali">
+<img height="35" src="https://i.imgur.com/034B8vq.png" /> </a>
+
+</p>
+
 - [What does shinyforms do?](#what-does-shinyforms-do)
 - [But, why?](#buy-why)
 - [How do I use this?](#how-do-i-use-this)
