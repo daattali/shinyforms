@@ -115,12 +115,31 @@ library(shinyforms)
 basicInfoForm <- list(
   id = "basicinfo",
   questions = list(
-    list(id = "name", type = "text", title = "Name", mandatory = TRUE,
-         hint = "Your name exactly as it is shown on your passport"),
-    list(id = "age", type = "numeric", title = "Age", mandatory = FALSE),
+    list(id = "name", type = "text", title = "Name", mandatory = TRUE, value = "", placeholder = "Add full name here", 
+         hint = "Your name exactly as it is shown on your passport", width = 350),
+    list(id = "age", type = "numeric", title = "Age", min = 0, max = 150, value = 0, step = 1, mandatory = FALSE, hint = "Age between: 0-150"),
     list(id = "favourite_pkg", type = "text", title = "Favourite R package"),
-    list(id = "terms", type = "checkbox", title = "I agree to the terms")
-  ),
+    list(id = "slider", type = "slider", title = "Slider Input", min = 1, max = 10,
+          value = 1, ticks = TRUE, mandatory = FALSE),
+    list(id = "date", type = "date", title = "Date"),
+    list(id = "terms", type = "checkbox", title = "I agree to the terms"),
+    list(id = "radios", type = "radio", title = "Radio buttons",
+         choices = c("Normal" = "norm",
+                      "Uniform" = "unif",
+                      "Log-normal" = "lnorm",
+                      "Exponential" = "exp")),
+    list(id = "daterange", type = "dateRange", title = "Date Range"),
+   list(id = "checkboxGroupInput", type = "checkboxGroup", title = "checkboxGroup", choices = c("Cylinders" = "cyl",
+                      "Transmission" = "am", "Gears" = "gear"),inline = FALSE),
+   list(id = "select", type = "select", title = "select input", choices = c("Cylinders" = "cyl",
+                                            "Transmission" = "am", "Gears" = "gear"), multiple = FALSE, selectize = TRUE),
+   list(id = "area", type = "textarea", title = "Area Box", mandatory = FALSE, value = "", placeholder = "description...", # placeholder not working?
+        hint = "free text description", width = 400),
+          list(id = "image", type = "image", src = "https://upload.wikimedia.org/wikipedia/en/d/d4/Mickey_Mouse.png", height = 300, width = 300),
+     list(id = "test", type = "select", title = "How's this?", choices = c("Batman" = "Bat",
+                                                                           "Superman" = "Super", "Mickey Mouse" = "Mickey"),
+   
+       multiple = FALSE, selectize = TRUE)),
   storage = list(
     type = STORAGE_TYPES$FLATFILE,
     path = "responses"
