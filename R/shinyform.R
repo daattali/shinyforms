@@ -215,6 +215,8 @@ formUI <- function(formInfo) {
               input <- numericInput(ns(question$id), NULL, 0)
             } else if (question$type == "checkbox") {
               input <- checkboxInput(ns(question$id), label, FALSE)
+            } else if(question$type == "multiplechoice") {
+              input <- radioButtons(ns(question$id), label = NULL, choices = question$choices)
             }
 
             div(
